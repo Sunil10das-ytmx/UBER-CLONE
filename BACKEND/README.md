@@ -74,3 +74,76 @@ curl -X POST http://localhost:4000/users/register \
   -H "Content-Type: application/json" \
   -d '{"fullname":{"firstname":"Raj","lastname":"Das"},"email":"raj@example.com","password":"s3cur3P@ss"}'
 ```
+
+## Users API — /users/login
+
+**Description**
+
+- Endpoint to authenticate an existing user. Accepts email and password, verifies credentials, and returns a JWT token and the user object (without the password).
+
+**URL**
+
+- POST /users/login
+
+**Headers**
+
+- Content-Type: application/json
+
+**Request body (JSON)**
+
+- email: string — required, must be a valid email
+- password: string — required, minimum 8 characters
+
+Example:
+
+```json
+{
+  "email": "raj@example.com",
+  "password": "s3cur3P@ssw0rd"
+}
+```
+
+**Validation / Errors**
+
+- 400 Bad Request — validation errors (missing fields, invalid email, password too short). Response example:
+
+```json
+{
+  "errors": [
+    { "msg": "Invalid Email", "param": "email", "location": "body" }
+  ]
+}
+```
+
+- 401 Unauthorized — invalid email or password.
+- 500 Internal Server Error — server-side or database errors.
+
+**Success**
+
+- 200 OK — JSON body contains `token` and `user` object (user object omits the `password` field). Example:
+
+```json
+{
+  "token": "<jwt-token>",
+  "user": {
+    "_id": "60f1c2d4a1b2c3d4e5f6a7b8",
+    "fullname": { "firstname": "Raj", "lastname": "Das" },
+    "email": "raj@example.com",
+    "socketID": null
+  }
+}
+```
+
+**Quick curl example**
+
+```bash
+curl -X POST http://localhost:4000/users/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"raj@example.com","password":"s3cur3P@ssw0rd"}'
+```
+
+**Notes**
+
+- Ensure `TOKEN_SECRET` is set in `.env` for JWT signing.
+- Successful login returns the same `token` structure used for authenticated routes.
+```
