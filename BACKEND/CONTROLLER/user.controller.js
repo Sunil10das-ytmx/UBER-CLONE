@@ -20,7 +20,7 @@ module.exports.registerUser=async(req,res,next)=>{
         password:hashedPassword
      }); 
 
-     const token=user.generateAuthToken();
+   const token = await user.generateAuthToken();
 
      res.status(200).json({token, user});
 }
@@ -47,7 +47,12 @@ module.exports.loginUser = async(req,res,next)=>{
       return res.status(401).json({message:'Invalid email or password'});
    }
 
-   const token=user.generateAuthToken();
+   const token = await user.generateAuthToken();
 
    res.status(200).json({token,user})
+}
+
+// !Get Profile
+module.exports.getUserProfile = async(req,res,next)=>{
+   res.status(200).json(req.user)
 }
