@@ -38,6 +38,9 @@ userSchema.methods.generateAuthToken = async function(){
       _id: this.id,
     },
     process.env.TOKEN_SECRET,
+    {
+        expiresIn:'24h'
+    }
   )
   return token;
 }

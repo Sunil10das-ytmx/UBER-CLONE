@@ -1,6 +1,7 @@
 const userModel = require('../MODELS/user.model.js')
 const userServices = require('../SERVICES/user.service.js') 
 const {validationResult} = require('express-validator')
+const blacklistModel = require('../MODELS/blacklist.model.js')
 
 // !registration user
 module.exports.registerUser=async(req,res,next)=>{
@@ -55,4 +56,25 @@ module.exports.loginUser = async(req,res,next)=>{
 // !Get Profile
 module.exports.getUserProfile = async(req,res,next)=>{
    res.status(200).json(req.user)
+}
+
+// !logout user
+module.exports.logoutUser = async (req,res,next)=>{
+    res.clearCookie('token');
+
+    let token;
+    if (req.cookies && req.cookies.token) {
+       token = req.cookies.token;
+    } else if (req.headers && req.headers.authorization) {
+       const parts = req.headers.authorization.split(' ');
+       token = parts.length === 2 ? parts[1] : parts[0];
+    }
+
+    if (!token) {
+       return res.status(400).json({ message: 'No token provided' });
+    }
+
+    await blacklistModel.create({ token });
+
+    res.status(200).json({ message: 'logged out' });
 }
