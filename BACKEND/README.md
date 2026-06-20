@@ -218,4 +218,134 @@ curl -X GET http://localhost:4000/users/profile \
 curl -X GET http://localhost:4000/users/logout \
   -H "Authorization: Bearer <jwt-token>"
 ```
+
+## Captains API
+
+This section documents the captain-facing endpoints: registration, login, profile, and logout.
+
+### POST /captains/registration
+
+Description:
+
+- Register a new captain (driver). Accepts `fullname`, `email`, `password`, and `vehicle` details.
+
+Headers:
+
+- `Content-Type: application/json`
+
+Request body (JSON):
+
+```json
+{
+  "fullname": { "firstname": "Raj", "lastname": "Das" },
+  "email": "raj@example.com",
+  "password": "s3cur3P@ssw0rd",
+  "vehicle": { "color": "Blue", "plate": "ABC1234", "capacity": 4, "vehicleType": "car" }
+}
+```
+
+Success:
+
+- 200 OK — returns `{ "token": "<jwt>", "captain": { ... } }` where `captain` omits the password.
+
+Errors:
+
+- 400 Bad Request — validation errors or missing fields.
+- 409 Conflict — captain already exists (if implemented).
+
+Quick curl example:
+
+```bash
+curl -X POST http://localhost:4000/captains/registration \
+  -H "Content-Type: application/json" \
+  -d '{"fullname":{"firstname":"Raj","lastname":"Das"},"email":"raj@example.com","password":"s3cur3P@ssw0rd","vehicle":{"color":"Blue","plate":"ABC1234","capacity":4,"vehicleType":"car"}}'
+```
+
+### POST /captains/login
+
+Description:
+
+- Authenticate a captain using email and password. Returns a JWT token and captain object.
+
+Headers:
+
+- `Content-Type: application/json`
+
+Request body (JSON):
+
+```json
+{ "email": "raj@example.com", "password": "s3cur3P@ssw0rd" }
+```
+
+Success:
+
+- 200 OK — returns `{ "token": "<jwt>", "captain": { ... } }` and sets a `token` cookie.
+
+Errors:
+
+- 400 Bad Request — validation errors.
+- 401 Unauthorized — invalid email or password.
+
+Quick curl example:
+
+```bash
+curl -X POST http://localhost:4000/captains/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"raj@example.com","password":"s3cur3P@ssw0rd"}'
+```
+
+### GET /captains/profile
+
+Description:
+
+- Returns the authenticated captain's profile. Requires a valid auth token (cookie or `Authorization: Bearer <token>` header).
+
+Headers:
+
+- `Authorization: Bearer <token>` or cookie `token` when using `cookie-parser`.
+
+Authentication:
+
+- Endpoint is protected by `authCaptain` middleware; provide a valid JWT token.
+
+Success:
+
+- 200 OK — returns the authenticated captain object (password excluded).
+
+Errors:
+
+- 401 Unauthorized — when token is missing, invalid, expired, or blacklisted.
+
+Quick curl example:
+
+```bash
+curl -X GET http://localhost:4000/captains/profile \
+  -H "Authorization: Bearer <jwt-token>"
+```
+
+### GET /captains/logout
+
+Description:
+
+- Logs out the authenticated captain by clearing the `token` cookie (if present) and adding the token to a blacklist.
+
+Headers / Cookies:
+
+- `Authorization: Bearer <token>` or cookie `token`.
+
+Success:
+
+- 200 OK — JSON message: `{"message":"logged out"}`.
+
+Errors:
+
+- 400 Bad Request — when no token is provided.
+- 401 Unauthorized — when token is invalid or already blacklisted.
+
+Quick curl example:
+
+```bash
+curl -X GET http://localhost:4000/captains/logout \
+  -H "Authorization: Bearer <jwt-token>"
+```
 ```
