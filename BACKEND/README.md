@@ -146,4 +146,76 @@ curl -X POST http://localhost:4000/users/login \
 
 - Ensure `TOKEN_SECRET` is set in `.env` for JWT signing.
 - Successful login returns the same `token` structure used for authenticated routes.
+
+## Users API — /users/profile
+
+**Description**
+
+- Returns the authenticated user's profile information. Requires a valid auth token (cookie or `Authorization: Bearer <token>` header).
+
+**URL**
+
+- GET /users/profile
+
+**Headers**
+
+- `Authorization: Bearer <token>` or cookie `token` when using `cookie-parser`.
+
+**Authentication**
+
+- Endpoint is protected by `authUser` middleware; provide a valid JWT token.
+
+**Success**
+
+- 200 OK — returns the authenticated user object (password excluded). Example:
+
+```json
+{
+  "_id": "60f1c2d4a1b2c3d4e5f6a7b8",
+  "fullname": { "firstname": "Raj", "lastname": "Das" },
+  "email": "raj@example.com",
+  "socketID": null
+}
+```
+
+**Errors**
+
+- 401 Unauthorized — when token is missing, invalid, expired, or blacklisted.
+
+**Quick curl example**
+
+```bash
+curl -X GET http://localhost:4000/users/profile \
+  -H "Authorization: Bearer <jwt-token>"
+```
+
+## Users API — /users/logout
+
+**Description**
+
+- Logs out the authenticated user by clearing the `token` cookie (if present) and adding the token to a blacklist so it cannot be reused until it expires.
+
+**URL**
+
+- GET /users/logout
+
+**Headers / Cookies**
+
+- `Authorization: Bearer <token>` or cookie `token`.
+
+**Success**
+
+- 200 OK — JSON message: `{"message":"logged out"}`.
+
+**Errors**
+
+- 400 Bad Request — when no token is provided.
+- 401 Unauthorized — when token is invalid or already blacklisted.
+
+**Quick curl example**
+
+```bash
+curl -X GET http://localhost:4000/users/logout \
+  -H "Authorization: Bearer <jwt-token>"
+```
 ```
