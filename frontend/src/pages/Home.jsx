@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import HeroImage from "../assets/UberFrontHeroImg.jpg";
 import Uberlogo from '../assets/Uber-logo.png'
 import { MoveRight } from 'lucide-react'
 import { Link } from "react-router-dom";
 
 const Home = () => {
+
   return (
     <>
       <div>
