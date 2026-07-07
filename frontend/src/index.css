@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
 .text-outline {
   text-shadow:
     -1px -1px 0 #000,
