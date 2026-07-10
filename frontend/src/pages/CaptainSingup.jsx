@@ -34,7 +34,7 @@ const CaptainSingup = () => {
           alt="RiderImg"
           className="absolute inset-0 w-full h-full object-cover opacity-40"
         />
-        <Link to="/login" className="absolute top-4 left-4 z-20">
+        <Link to="/captain-login" className="absolute top-4 left-4 z-20">
           <MoveLeft size={42} color="#110e0e" />
         </Link>
 

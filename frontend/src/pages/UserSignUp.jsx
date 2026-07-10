@@ -1,14 +1,20 @@
 import React, { useState } from "react";
 import UberTrafficLight from "../assets/Uber-traffic-light.jpg";
 import { MoveLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from 'axios'
+import {UserDataContext} from "../context/UserContext";
 
 const UserSignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [userData, setUserData] = useState({});
+  // const [userData, setUserData] = useState({});
+
+  const navigate = useNavigate()
+
+  const {user,setUser} = React.useContext(UserDataContext)
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -20,6 +26,21 @@ const UserSignUp = () => {
       email: email,
       password: password,
     };
+
+    try {
+    // note: route is /users/register (plural)
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
+
+    // backend currently returns 200 on success; accept 200 or 201
+    if (response.status === 200 || response.status === 201) {
+      const data = response.data;
+      setUser(data.user);
+      navigate('/home');
+    }
+  } catch (err) {
+    console.error('Signup error', err?.response || err);
+    // TODO: show a user-friendly error message in the UI
+  }
 
     setEmail("");
     setFirstName("");
