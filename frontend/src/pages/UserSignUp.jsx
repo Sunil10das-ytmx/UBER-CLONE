@@ -4,6 +4,7 @@ import { MoveLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios'
 import {UserDataContext} from "../context/UserContext";
+import { useContext } from "react";
 
 const UserSignUp = () => {
   const [email, setEmail] = useState("");
@@ -15,6 +16,7 @@ const UserSignUp = () => {
   const navigate = useNavigate()
 
   const {user,setUser} = React.useContext(UserDataContext)
+  useContext
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -28,18 +30,16 @@ const UserSignUp = () => {
     };
 
     try {
-    // note: route is /users/register (plural)
     const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
-
-    // backend currently returns 200 on success; accept 200 or 201
     if (response.status === 200 || response.status === 201) {
       const data = response.data;
       setUser(data.user);
-      navigate('/home');
+      localStorage.setItem('token',data.token)
+      navigate('/login');
     }
   } catch (err) {
     console.error('Signup error', err?.response || err);
-    // TODO: show a user-friendly error message in the UI
+  
   }
 
     setEmail("");

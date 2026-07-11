@@ -4,26 +4,42 @@ import { MoveLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {UserDataContext} from "../context/UserContext";
+import { useContext } from "react";
+import axios from 'axios'
+
 
 
 const Userlogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userData, setUserdata] = useState({});
+  // const [userData, setUserdata] = useState({});
 
     const navigate = useNavigate()
 
+    const {user,setUser} = React.useContext(UserDataContext)
 
-  const Submitfrom = (e) => {
+  const Submitfrom = async (e) => {
     e.preventDefault();
 
+    const userData={
+      email: email,
+      password: password,
+    }
+
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`,userData)
+      if(response.status === 200){
+        const data=response.data
+        setUser(data.user)
+        localStorage.setItem('token',data.token)
+        navigate('/home')
+      }
+    } catch (err) {
+      console.error('login error', err?.response || err);
+    }
     setEmail("");
     setPassword("");
 
-    setUserdata({
-      email: email,
-      password: password,
-    });
     console.log(userData);
   };
 
