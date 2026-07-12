@@ -1,15 +1,16 @@
 import React from 'react'
 import {Routes,Route} from 'react-router-dom'
-import Start from './pages/Start'
-import Userlogin from './pages/Userlogin'
-import UserSignUp from './pages/UserSignUp'
-import CaptainLogin from './pages/CaptainLogin'
-import CaptainSignup from './pages/CaptainSingup'
 import Home from './pages/Home'
+import Start from './pages/Start'
+import UserSignUp from './pages/UserSignUp'
+import Userlogin from './pages/Userlogin'
 import UserLogout from './pages/UserLogout'
+import CaptainHome from './pages/CaptainHome'
+import CaptainSignup from './pages/CaptainSingup'
+import CaptainLogin from './pages/CaptainLogin'
+import CaptainLogout from './pages/CaptainLogout'
 import UserprotectWrapper from './pages/UserprotectWrapper'
 import CaptainProtectWrapper from './pages/CaptainProtectWrapper'
-import CaptainHome from './pages/CaptainHome'
 
 const App = () => {
   return (
@@ -23,6 +24,11 @@ const App = () => {
           } />
           <Route path='/login' element={<Userlogin/>} />
           <Route path='/singup' element={<UserSignUp/>} />
+          <Route path='/user/logout' element={
+            <UserprotectWrapper>
+              <UserLogout/>
+            </UserprotectWrapper>
+          } />
           <Route path='/captain-home' element={
             <CaptainProtectWrapper>
               <CaptainHome/>
@@ -30,11 +36,7 @@ const App = () => {
           }/>
           <Route path='/captain-login' element={<CaptainLogin/>} />
           <Route path='/captain-singup' element={<CaptainSignup/>} />
-          <Route path='/user/logout' element={
-            <UserprotectWrapper>
-              <UserLogout/>
-            </UserprotectWrapper>
-          } />
+          <Route path='/captain-logout' element={<CaptainLogout/>} />
         </Routes>
       </div>
   )
