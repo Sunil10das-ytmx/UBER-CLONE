@@ -203,15 +203,19 @@ export const westBengalAddresses = [
   },
 ];
 
-const LocationSearchPanel = () => {
+const LocationSearchPanel = (props) => {
   return (
     <>
       <div>
-        <div className="max-h-129 space-y-2 overflow-y-auto pr-2 pt-2 pl-2 pb-2">
+        <div className="max-h-129 space-y-2  overflow-y-auto pr-2 pt-2 pl-2 pb-2">
           {westBengalAddresses.map((address) => (
             <div
               key={address.id}
-              className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3"
+              onClick={()=>{
+                props.setvehiclePanelOpen(true)
+                // props.setpanelOpen(false)
+              }}
+              className="flex items-start gap-3 rounded-xl active:border-black border border-slate-200 bg-slate-50 p-3"
             >
               <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-500">
                 <i className="ri-map-pin-2-fill"></i>
