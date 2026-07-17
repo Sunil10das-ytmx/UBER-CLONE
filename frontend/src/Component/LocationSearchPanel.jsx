@@ -211,9 +211,10 @@ const LocationSearchPanel = (props) => {
           {westBengalAddresses.map((address) => (
             <div
               key={address.id}
-              onClick={()=>{
+              onClick={() => {
+                props.setSelectedAddress?.(address)
                 props.setvehiclePanelOpen(true)
-                // props.setpanelOpen(false)
+                props.setpanelOpen?.(false)
               }}
               className="flex items-start gap-3 rounded-xl active:border-black border border-slate-200 bg-slate-50 p-3"
             >

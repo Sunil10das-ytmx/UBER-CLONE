@@ -6,6 +6,7 @@ import gsap from 'gsap'
 import 'remixicon/fonts/remixicon.css'
 import LocationSearchPanel from '../Component/LocationSearchPanel'
 import VehiclePanel from '../Component/VehiclePanel'
+import ConfirmedRide from '../Component/ConfirmedRide'
 
 const Home = () => {
   const[pickup,setPickup]=useState('')
@@ -14,7 +15,11 @@ const Home = () => {
   const panelRef = useRef(null)
   const panelCloeRef = useRef(null)
   const vehiclePanelRef = useRef(null)
+  const confirmedRidePanelRef = useRef(null)
   const [vehiclePanelOpen, setvehiclePanelOpen] = useState(false)
+  const [ConfirmedRidePanel, setConfirmedRidePanel] = useState(false)
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
   const submitHandler=((e)=>{
     e.preventDefault()
@@ -51,6 +56,18 @@ const Home = () => {
       })
     }
   },[vehiclePanelOpen])
+
+  useGSAP(function(){
+    if(ConfirmedRidePanel){
+      gsap.to(confirmedRidePanelRef.current,{
+        transform:'translate(0)'
+      })
+    }else{
+      gsap.to(confirmedRidePanelRef.current,{
+        transform:'translate(100%)'
+      })
+    }
+  },[ConfirmedRidePanel])
   
   return (
     <>
@@ -106,13 +123,17 @@ const Home = () => {
             className='bg-[#eee] px-12 py-2 text-base rounded-lg w-full ' type='text' placeholder='Enetr your destination'/>
           </form>
           </div>
-          <div ref={panelRef} className=' bg-gray-200  h-0'>
-              <LocationSearchPanel setpanelOpen={setpanelOpen}  setvehiclePanelOpen={setvehiclePanelOpen}/>
-          </div>
+            <div ref={panelRef} className=' bg-gray-200  h-0'>
+              <LocationSearchPanel setpanelOpen={setpanelOpen} setvehiclePanelOpen={setvehiclePanelOpen} setSelectedAddress={setSelectedAddress} />
+            </div>
         </div>
 
           <div ref={vehiclePanelRef} className='fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white p-3'>
-              <VehiclePanel  setvehiclePanelOpen={setvehiclePanelOpen}/>
+              <VehiclePanel  setvehiclePanelOpen={setvehiclePanelOpen} setConfirmedRidePanel={setConfirmedRidePanel} setSelectedVehicle={setSelectedVehicle}/>
+          </div>
+
+          <div ref={confirmedRidePanelRef} className='fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white p-3'>
+                <ConfirmedRide  setvehiclePanelOpen={setvehiclePanelOpen} selectedVehicle={selectedVehicle} setConfirmedRidePanel={setConfirmedRidePanel} address={selectedAddress} />
           </div>
       </div>
     </>

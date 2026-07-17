@@ -4,43 +4,99 @@ import UberBike from '../assets/UberBike.webp'
 import UberAuto from '../assets/UberAuto.png'
 
 const VehiclePanel = (props) => {
+
+  const vehicles = [
+    {
+      id: 1,
+      image: UberCar,
+      name: "UberCar",
+      seats: 4,
+      time: "2 mins away",
+      description: "Affordable,compact rides",
+      price: "₹193.20",
+      imageClass: "h-20",
+      contentClass: "mr-4 w-1/2 pb-2 pt-2"
+    },
+    {
+      id: 2,
+      image: UberAuto,
+      name: "UberAuto",
+      seats: 4,
+      time: "7 mins away",
+      description: "Affordable,comfartable rides",
+      price: "₹118.20",
+      imageClass: "h-20",
+      contentClass: "mr-4 w-1/2 pb-2 pt-2"
+    },
+    {
+      id: 3,
+      image: UberBike,
+      name: "Moto",
+      seats: 1,
+      time: "3 mins away",
+      description: "Affordable motorcycle rides",
+      price: "₹65.17",
+      imageClass: "h-20",
+      contentClass: "-ml-5 mr-4 w-1/2 pb-2 pt-2"
+    }
+  ];
+
   return (
     <>
-      <h3 className=' text-2xl font-bold'>Choose a Vehicle</h3>
-            <h3 
-            onClick={()=>{
-              props.setvehiclePanelOpen(false)
-            }}
-             className='absolute top-4 right-2 cursor-pointer text-2xl'><i className="ri-close-fill"></i></h3>
-            <div className='flex w-full items-center justify-between rounded-xl border-2 border-gray-500 active:border-black active:border-3 pr-9'>
-              <img className='h-20' src={UberCar} />
-              <div className='mr-4 w-1/2 pb-2 pt-2'>
-                <h4 className='text-lg font-medium'>UberCar <span><i className="ri-user-3-fill"></i>4</span></h4>
-                <h5 className='text-sm font-medium'>2 mins away</h5>
-                <p className='text-xs font-normal text-gray-600'>Affordable,compact rides</p>
-              </div>
-              <h2 className='text-xl font-semibold'>₹193.20</h2>
-            </div>
+      <h3 className='text-2xl font-bold'>
+        Choose a Vehicle
+      </h3>
 
-            <div className='flex w-full items-center justify-between rounded-xl border-2 border-gray-500 active:border-black active:border-3 pr-9'>
-              <img className='h-20' src={UberAuto} />
-              <div className='mr-4 w-1/2 pb-2 pt-2'>
-                <h4 className='text-lg font-medium'>UberAuto <span><i className="ri-user-3-fill"></i>4</span></h4>
-                <h5 className='text-sm font-medium'>7 mins away</h5>
-                <p className='text-xs font-normal text-gray-600'>Affordable,comfartable rides</p>
-              </div>
-              <h2 className='text-xl font-semibold'>₹118.20</h2>
-            </div>
+      <h3
+        onClick={() => {
+          props.setvehiclePanelOpen(false)
+        }}
+        className='absolute top-4 right-2 cursor-pointer text-2xl'
+      >
+        <i className="ri-close-fill"></i>
+      </h3>
 
-            <div className='flex w-full items-center justify-between rounded-xl border-2 border-gray-500 active:border-black active:border-3 pr-9'>
-              <img className='h-20' src={UberBike} />
-              <div className='-ml-5 mr-4 w-1/2 pb-2 pt-2'>
-                <h4 className='text-lg font-medium'>Moto <span><i className="ri-user-3-fill"></i>1</span></h4>
-                <h5 className='text-sm font-medium'>3 mins away</h5>
-                <p className='text-xs font-normal text-gray-600'>Affordable motorcycle rides</p>
-              </div>
-              <h2 className='text-xl font-semibold'>₹65.17</h2>
-            </div>
+      {vehicles.map((vehicle) => (
+        <div
+          key={vehicle.id}
+          onClick={() => {
+            props.setConfirmedRidePanel(true)
+            props.setSelectedVehicle(vehicle);
+
+            // We'll use this later
+            // props.setSelectedVehicle(vehicle)
+          }}
+          className='flex w-full items-center justify-between rounded-xl border-2 border-gray-500 active:border-black active:border-3 pr-9'
+        >
+          <img
+            className={vehicle.imageClass}
+            src={vehicle.image}
+            alt={vehicle.name}
+          />
+
+          <div className={vehicle.contentClass}>
+            <h4 className='text-lg font-medium'>
+              {vehicle.name}
+              <span>
+                <i className="ri-user-3-fill"></i>
+                {vehicle.seats}
+              </span>
+            </h4>
+
+            <h5 className='text-sm font-medium'>
+              {vehicle.time}
+            </h5>
+
+            <p className='text-xs font-normal text-gray-600'>
+              {vehicle.description}
+            </p>
+          </div>
+
+          <h2 className='text-xl font-semibold'>
+            {vehicle.price}
+          </h2>
+        </div>
+      ))}
     </>
   )
 }
