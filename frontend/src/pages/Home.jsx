@@ -18,6 +18,7 @@ import UberAuto from "../assets/UberAuto.png";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import WaitingforDriver from "../Component/WaitingforDriver";
 
 const Home = () => {
   const ubervehicle = [
@@ -256,6 +257,7 @@ const Home = () => {
               />
             </form>
           </div>
+
           <div ref={panelRef} className=" bg-gray-200  h-0">
             <LocationSearchPanel
               setpanelOpen={setpanelOpen}
@@ -267,7 +269,7 @@ const Home = () => {
 
         <div
           ref={vehiclePanelRef}
-          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white p-3"
+          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
         >
           <VehiclePanel
             setvehiclePanelOpen={setvehiclePanelOpen}
@@ -278,7 +280,7 @@ const Home = () => {
 
         <div
           ref={confirmedRidePanelRef}
-          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white p-3"
+          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
         >
           <ConfirmedRide
             setvehicleFound={setvehicleFound}
@@ -290,12 +292,21 @@ const Home = () => {
 
         <div
           ref={vehicleFoundRef}
-          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white p-3"
+          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
         >
           <LookingforDriver
             address={selectedAddress}
             selectedVehicle={selectedVehicle}
             setvehicleFound={setvehicleFound}
+          />
+        </div>
+
+        <div
+          ref={}
+          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
+        >
+          <WaitingforDriver
+            
           />
         </div>
       </div>
