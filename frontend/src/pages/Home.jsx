@@ -7,19 +7,23 @@ import 'remixicon/fonts/remixicon.css'
 import LocationSearchPanel from '../Component/LocationSearchPanel'
 import VehiclePanel from '../Component/VehiclePanel'
 import ConfirmedRide from '../Component/ConfirmedRide'
+import LookingforDriver from '../Component/LookingforDriver'
 
 const Home = () => {
-  const[pickup,setPickup]=useState('')
-  const [destination, setDestination] = useState('')
-  const [panelOpen, setpanelOpen] = useState(false)
   const panelRef = useRef(null)
   const panelCloeRef = useRef(null)
   const vehiclePanelRef = useRef(null)
+  const vehicleFoundRef = useRef(null)
   const confirmedRidePanelRef = useRef(null)
+
+  const[pickup,setPickup]=useState('')
+  const [panelOpen, setpanelOpen] = useState(false)
+  const [destination, setDestination] = useState('')
   const [vehiclePanelOpen, setvehiclePanelOpen] = useState(false)
   const [ConfirmedRidePanel, setConfirmedRidePanel] = useState(false)
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [vehicleFound, setvehicleFound] = useState(false);
 
   const submitHandler=((e)=>{
     e.preventDefault()
@@ -68,6 +72,26 @@ const Home = () => {
       })
     }
   },[ConfirmedRidePanel])
+
+
+
+  useGSAP(function(){
+    if(vehicleFound){
+      gsap.to(vehicleFoundRef.current,{
+        transform:'translate(0)'
+      })
+      gsap.to(confirmedRidePanelRef.current,{
+        height:'0%'
+      })
+    }else{
+      gsap.to(vehicleFoundRef.current,{
+        transform:'translate(100%)'
+      })
+      gsap.to(confirmedRidePanelRef.current,{
+        height:'67%'
+      })
+    }
+  },[vehicleFound])
   
   return (
     <>
@@ -133,7 +157,11 @@ const Home = () => {
           </div>
 
           <div ref={confirmedRidePanelRef} className='fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white p-3'>
-                <ConfirmedRide  setvehiclePanelOpen={setvehiclePanelOpen} selectedVehicle={selectedVehicle} setConfirmedRidePanel={setConfirmedRidePanel} address={selectedAddress} />
+                <ConfirmedRide setvehicleFound={setvehicleFound}  selectedVehicle={selectedVehicle} setConfirmedRidePanel={setConfirmedRidePanel} address={selectedAddress} />
+          </div>
+
+          <div ref={vehicleFoundRef} className='fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white p-3'>
+          <LookingforDriver address={selectedAddress} selectedVehicle={selectedVehicle} setvehicleFound={setvehicleFound}/>
           </div>
       </div>
     </>
