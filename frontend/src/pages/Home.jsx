@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import UberLogo from "../assets/Uber-logo.png";
 import ubermap from "../assets/uber-map.gif";
 import { useGSAP } from "@gsap/react";
@@ -42,6 +42,7 @@ const Home = () => {
   const vehicleFoundRef = useRef(null);
   const inputRef = useRef(null);
   const confirmedRidePanelRef = useRef(null);
+  const waitingForDriverRef = useRef(null);
 
   const [pickup, setPickup] = useState("");
   const [panelOpen, setpanelOpen] = useState(false);
@@ -51,6 +52,7 @@ const Home = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [vehicleFound, setvehicleFound] = useState(false);
+  const [waitingForDriver, setWaitingForDriver] = useState(false);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -139,6 +141,32 @@ const Home = () => {
     },
     [vehicleFound],
   );
+
+  useGSAP(
+    function () {
+      if (waitingForDriver) {
+        gsap.to(waitingForDriverRef.current, {
+          transform: "translateY(0)",
+        });
+      } else {
+        gsap.to(waitingForDriverRef.current, {
+          transform: "translateY(100%)",
+        });
+      }
+    },
+    [waitingForDriver],
+  );
+
+  useEffect(() => {
+    if (vehicleFound) {
+      const timer = setTimeout(() => {
+        setvehicleFound(false);
+        setvehiclePanelOpen(false);
+        setWaitingForDriver(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [vehicleFound]);
 
   return (
     <>
@@ -302,11 +330,13 @@ const Home = () => {
         </div>
 
         <div
-          ref={}
-          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
+          ref={waitingForDriverRef}
+          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-y-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
         >
           <WaitingforDriver
-            
+            selectedVehicle={selectedVehicle}
+            address={selectedAddress}
+            setWaitingForDriver={setWaitingForDriver}
           />
         </div>
       </div>
