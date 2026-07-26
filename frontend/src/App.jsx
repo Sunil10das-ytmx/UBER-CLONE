@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {Routes,Route} from 'react-router-dom'
 import Home from './pages/Home'
 import Start from './pages/Start'
@@ -14,13 +14,16 @@ import CaptainProtectWrapper from './pages/CaptainProtectWrapper'
 import Riding from './pages/Riding'
 
 const App = () => {
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+
   return (
       <div>
         <Routes>
           <Route path='/' element={<Start/>} />
           <Route path='/home' element={
             <UserprotectWrapper>
-              <Home/>
+              <Home  />
             </UserprotectWrapper>
           } />
           <Route path='/login' element={<Userlogin/>} />
@@ -33,7 +36,7 @@ const App = () => {
           } />
           <Route path='/captain-home' element={
             <CaptainProtectWrapper>
-              <CaptainHome/>
+              <CaptainHome  />
             </CaptainProtectWrapper>
           }/>
           <Route path='/captain-login' element={<CaptainLogin/>} />

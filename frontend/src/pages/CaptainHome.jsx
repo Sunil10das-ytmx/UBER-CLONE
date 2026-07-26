@@ -1,10 +1,31 @@
-import React from "react";
+import React, { useState, useRef, useEffect }  from "react";
 import { Link } from "react-router-dom"; // TEMPORARY: Using location state for navigate routing
 import UberMap from "../assets/Uber-map.gif";
 import UberLogo from '../assets/Uber-logo.png'
 import CaptainDetails from "../Component/CaptainDetails";
+import RidePopUp from "../Component/RidePopUp";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
-const CaptainHome = () => {
+const CaptainHome = (props) => {
+  const RidePopUpRef = useRef(null)
+
+  const [ridePopUpPanel, setRidePopUpPanel] = useState(true)
+
+  useGSAP(function () {
+      if (ridePopUpPanel) {
+        gsap.to(RidePopUpRef.current, {
+          transform: "translateY(0)",
+        });
+      } else {
+        gsap.to(RidePopUpRef.current, {
+          transform: "translateY(100%)",
+        });
+      }
+    },
+    [ridePopUpPanel],
+  );
+
   return (
     <>
       <div className="h-screen">
@@ -26,9 +47,14 @@ const CaptainHome = () => {
           <img className="h-full w-full object-cover" src={UberMap} />
         </div>
 
-        <div className="h-2/5 p-6 bg-white rounded-tr-lg rounded-tl-lg"> 
+        <div className="h-2/5 p-6 bg-white rounded-t-3xl relative -mt-6 z-10"> 
           <CaptainDetails/>
         </div>
+
+        <div ref={RidePopUpRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-y-full  gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
+            <RidePopUp  setRidePopUpPanel={setRidePopUpPanel} />
+        </div>
+          
       </div>
     </>
   );

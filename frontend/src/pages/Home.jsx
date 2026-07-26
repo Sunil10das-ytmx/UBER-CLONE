@@ -21,7 +21,7 @@ import "swiper/css/pagination";
 import WaitingforDriver from "../Component/WaitingforDriver";
 import Riding from "./Riding";
 
-const Home = () => {
+const Home = (props) => {
   const ubervehicle = [
     {
       id: 1,
@@ -50,10 +50,20 @@ const Home = () => {
   const [destination, setDestination] = useState("");
   const [vehiclePanelOpen, setvehiclePanelOpen] = useState(false);
   const [ConfirmedRidePanel, setConfirmedRidePanel] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
-  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedVehicle, setSelectedVehicleState] = useState(null);
+  const [selectedAddress, setSelectedAddressState] = useState(null);
   const [vehicleFound, setvehicleFound] = useState(false);
   const [waitingForDriver, setWaitingForDriver] = useState(false);
+
+  const setSelectedAddress = (addr) => {
+    setSelectedAddressState(addr);
+    props.setSelectedAddress?.(addr);
+  };
+
+  const setSelectedVehicle = (veh) => {
+    setSelectedVehicleState(veh);
+    props.setSelectedVehicle?.(veh);
+  };
 
   const submitHandler = (e) => {
     e.preventDefault();
