@@ -19,6 +19,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import WaitingforDriver from "../Component/WaitingforDriver";
+import Riding from "./Riding";
 
 const Home = () => {
   const ubervehicle = [
@@ -337,6 +338,17 @@ const Home = () => {
             selectedVehicle={selectedVehicle}
             address={selectedAddress}
             setWaitingForDriver={setWaitingForDriver}
+          />
+        </div>
+
+        <div
+          // ref={confirmedRidePanelRef}
+          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
+        >
+          <Riding
+             selectedVehicle={selectedVehicle}
+             address={selectedAddress}
+             setWaitingForDriver={setWaitingForDriver}
           />
         </div>
       </div>
