@@ -12,6 +12,7 @@ import CaptainLogout from './pages/CaptainLogout'
 import UserprotectWrapper from './pages/UserprotectWrapper'
 import CaptainProtectWrapper from './pages/CaptainProtectWrapper'
 import Riding from './pages/Riding'
+import CaptainRiding from './pages/CaptainRiding'
 
 const App = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -41,6 +42,7 @@ const App = () => {
           }/>
           <Route path='/captain-login' element={<CaptainLogin/>} />
           <Route path='/captain-singup' element={<CaptainSignup/>} />
+          <Route path='/captain-riding' element={<CaptainRiding/>} />
           <Route path='/captain-logout' element={<CaptainLogout/>} />
         </Routes>
       </div>
