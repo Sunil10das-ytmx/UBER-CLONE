@@ -33,10 +33,12 @@ const RidePopUp = (props) => {
               </div> 
           </div>
           <div className='flex gap-3'>
-            <button className='w-full bg-green-600 text-white font-semibold p-2 rounded-lg'>Accpet</button>
+            <button onClick={()=>{
+              props.setConfirmedRidePopUpPanel(true)
+            }} className='w-full bg-green-600 text-white font-semibold p-2 rounded-lg'>Accpet</button>
           <button onClick={()=>{
             props.setRidePopUpPanel(false)
-          }} className='w-full bg-gray-400 text-white font-semibold p-2 rounded-lg'>Reject</button>
+          }} className='w-full bg-gray-400 text-red-500 font-semibold p-2 rounded-lg'>Reject</button>
           </div>
         </div>
     </>
