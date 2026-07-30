@@ -9,7 +9,7 @@ const userRoutes=require('./ROUTES/user.routes.js')
 const captainRoutes = require('./ROUTES/captain.route.js')
 const cookieParser = require('cookie-parser')
 const mapRoutes = require('./ROUTES/maps.route.js')
-
+const rideRoutes = require('./ROUTES/ride.route.js');
 connectDatabase();
 
 app.use(cors());
@@ -25,4 +25,5 @@ app.get('/',(req,res)=>{
 app.use('/users',userRoutes);
 app.use('/captains',captainRoutes)
 app.use('/maps',mapRoutes)
+app.use('/rides',rideRoutes)
 module.exports = app;
