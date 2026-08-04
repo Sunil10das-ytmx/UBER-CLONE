@@ -1,10 +1,12 @@
 import React from "react";
+import { formatAddress } from "../utils/formatAddress";
 import uberDriver from "../assets/UberDriver.png";
 import UberCar from "../assets/UberCar.png";
 import UberBike from "../assets/UberBike.webp";
 import UberAuto from "../assets/UberAuto.png";
 
 const WaitingforDriver = (props) => {
+  const formattedAddr = formatAddress(props.address, "Pickup Point");
   const uberdrivers = [
     // ===================== CARS =====================
     {
@@ -236,18 +238,19 @@ const WaitingforDriver = (props) => {
         </div>
 
         <div className="flex flex-col gap-4 w-full">
-          <div className="flex items-center gap-4 p-2 border-b border-gray-100">
-            <h3 className="text-xl text-gray-700">
+          <div className="flex items-center gap-4 p-2 border-b border-gray-100 min-w-0">
+            <h3 className="text-xl text-gray-700 shrink-0">
               <i className="ri-map-pin-2-fill"></i>
             </h3>
-            <div>
-              <h3 className="text-lg font-semibold">
-                {props.address?.place ?? "Pickup Point"}
+            <div className="overflow-hidden min-w-0">
+              <h3 className="text-lg font-semibold truncate">
+                {formattedAddr.title}
               </h3>
-              <p className="text-sm text-gray-500">
-                {props.address?.city ?? "Unknown City"}
-                {props.address?.state ? `, ${props.address.state}` : ""}
-              </p>
+              {formattedAddr.subtext ? (
+                <p className="text-sm text-gray-500 truncate">
+                  {formattedAddr.subtext}
+                </p>
+              ) : null}
             </div>
           </div>
 
@@ -257,7 +260,7 @@ const WaitingforDriver = (props) => {
             </h3>
             <div>
               <h3 className="text-lg font-semibold">
-                {props.selectedVehicle?.price ?? "₹0"}
+                {props.selectedVehicle?.price || (props.fare && props.selectedVehicle?.valueKey && props.fare[props.selectedVehicle.valueKey] ? `₹${props.fare[props.selectedVehicle.valueKey]}` : "₹0")}
               </h3>
               <p className="text-sm text-gray-500">Cash payment</p>
             </div>

@@ -1,7 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { formatAddress } from "../utils/formatAddress";
 
 const LookingforDriver = (props) => {
+  const formattedAddr = formatAddress(props.address);
+
   return (
     <>
       <div className="h-[477.56px]">
@@ -48,19 +51,19 @@ const LookingforDriver = (props) => {
           </div>
 
           <div className="w-full flex flex-col mt-3 gap-4">
-            <div className="flex items-center p-2 gap-3">
-              <h3 className="text-2xl">
+            <div className="flex items-center p-2 gap-3 min-w-0">
+              <h3 className="text-2xl shrink-0">
                 <i className="ri-map-pin-2-fill"></i>
               </h3>
-              <div>
-                <h3 className="text-2xl font-medium">
-                  {props.address?.place ?? "Unknown place"}
+              <div className="overflow-hidden min-w-0">
+                <h3 className="text-lg font-semibold truncate">
+                  {formattedAddr.title}
                 </h3>
-                <p className="text-lg text-gray-500">
-                  {props.address?.city ?? "Unknown city"},
-                  {props.address?.state ?? "Unknown state"},
-                  {props.address?.pincode ?? ""}
-                </p>
+                {formattedAddr.subtext ? (
+                  <p className="text-sm text-gray-500 truncate">
+                    {formattedAddr.subtext}
+                  </p>
+                ) : null}
               </div>
             </div>
 
@@ -69,7 +72,7 @@ const LookingforDriver = (props) => {
                 <i className="ri-wallet-2-fill"></i>
               </h3>
               <div className="font-bold text-xl">
-                {props.selectedVehicle?.price}
+                {props.selectedVehicle?.price || (props.fare && props.selectedVehicle?.valueKey && props.fare[props.selectedVehicle.valueKey] ? `₹${props.fare[props.selectedVehicle.valueKey]}` : '₹193.20')}
               </div>
             </div>
           </div>

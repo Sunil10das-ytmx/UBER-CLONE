@@ -8,7 +8,7 @@ function getOtp(num) {
         return otp;
     }
     return generateOtp(num);
-}
+} 
 
 async function getFare(pickup, destination) {
     if (!pickup || !destination) {

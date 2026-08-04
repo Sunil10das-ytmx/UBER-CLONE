@@ -2,7 +2,8 @@ const axios = require('axios');
 
 module.exports.getAddressCoordinate = async (address) => {
     const apiKey = process.env.LOCATIONIQ_API_KEY || 'pk.235105163404bb7ad5bfd7cfce013b7c';
-    const url = `https://us1.locationiq.com/v1/search?key=${apiKey}&q=${encodeURIComponent(address)}&format=json&limit=1`;
+    const searchQuery = address.toLowerCase().includes('india') ? address : `${address}, West Bengal, India`;
+    const url = `https://us1.locationiq.com/v1/search?key=${apiKey}&q=${encodeURIComponent(searchQuery)}&format=json&limit=1&countrycodes=in`;
 
     try {
         const response = await axios.get(url);

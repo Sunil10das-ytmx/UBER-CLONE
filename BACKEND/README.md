@@ -348,4 +348,303 @@ Quick curl example:
 curl -X GET http://localhost:4000/captains/logout \
   -H "Authorization: Bearer <jwt-token>"
 ```
+
+## Maps API
+
+This section documents the map endpoints: geocoding, distance & duration calculation, and location auto-suggestions.
+
+### GET /maps/get-coordinates
+
+**Description**
+
+- Fetch latitude and longitude coordinates for a given address using location services.
+
+**URL**
+
+- GET /maps/get-coordinates
+
+**Headers**
+
+- `Authorization: Bearer <token>` or cookie `token`
+
+**Authentication**
+
+- Endpoint is protected by `authUser` middleware; provide a valid user JWT token.
+
+**Query Parameters**
+
+- `address`: string — required, minimum 3 characters.
+
+Example:
+`/maps/get-coordinates?address=Howrah%20Railway%20Station`
+
+**Validation / Errors**
+
+- 400 Bad Request — validation errors (missing address or less than 3 characters).
+- 401 Unauthorized — when token is missing or invalid.
+- 404 Not Found — when coordinates cannot be found for the given address.
+
+**Success**
+
+- 200 OK — JSON object containing `ltd` (latitude) and `lng` (longitude). Example:
+
+```json
+{
+  "ltd": 22.5830297,
+  "lng": 88.3427845
+}
 ```
+
+**Quick curl example**
+
+```bash
+curl -X GET "http://localhost:4000/maps/get-coordinates?address=Howrah%20Railway%20Station" \
+  -H "Authorization: Bearer <jwt-token>"
+```
+
+### GET /maps/get-distance-time
+
+**Description**
+
+- Calculates distance and estimated travel time between an origin and destination location.
+
+**URL**
+
+- GET /maps/get-distance-time
+
+**Headers**
+
+- `Authorization: Bearer <token>` or cookie `token`
+
+**Authentication**
+
+- Endpoint is protected by `authUser` middleware; provide a valid user JWT token.
+
+**Query Parameters**
+
+- `origin`: string — required, minimum 3 characters.
+- `destination`: string — required, minimum 3 characters.
+
+Example:
+`/maps/get-distance-time?origin=Howrah%20Railway%20Station&destination=Dakshineswar%20Kali%20Temple`
+
+**Validation / Errors**
+
+- 400 Bad Request — validation errors (missing fields or less than 3 characters).
+- 401 Unauthorized — when token is missing or invalid.
+- 500 Internal Server Error — server-side error or location service failure.
+
+**Success**
+
+- 200 OK — JSON object containing distance and duration data. Example:
+
+```json
+{
+  "distance": {
+    "text": "14.2 km",
+    "value": 14200
+  },
+  "duration": {
+    "text": "32 mins",
+    "value": 1920
+  }
+}
+```
+
+**Quick curl example**
+
+```bash
+curl -X GET "http://localhost:4000/maps/get-distance-time?origin=Howrah%20Railway%20Station&destination=Dakshineswar%20Kali%20Temple" \
+  -H "Authorization: Bearer <jwt-token>"
+```
+
+### GET /maps/get-suggestions
+
+**Description**
+
+- Fetch address auto-suggestions based on user search query input.
+
+**URL**
+
+- GET /maps/get-suggestions
+
+**Headers**
+
+- `Authorization: Bearer <token>` or cookie `token`
+
+**Authentication**
+
+- Endpoint is protected by `authUser` middleware; provide a valid user JWT token.
+
+**Query Parameters**
+
+- `input`: string — required, minimum 3 characters.
+
+Example:
+`/maps/get-suggestions?input=Howrah`
+
+**Validation / Errors**
+
+- 400 Bad Request — validation errors (missing input or less than 3 characters).
+- 401 Unauthorized — when token is missing or invalid.
+- 500 Internal Server Error — server-side error or location service failure.
+
+**Success**
+
+- 200 OK — JSON array of string address suggestions. Example:
+
+```json
+[
+  "Howrah Railway Station, Howrah, West Bengal, India",
+  "Howrah Bridge, Kolkata, West Bengal, India",
+  "Howrah Maidan, Howrah, West Bengal, India"
+]
+```
+
+**Quick curl example**
+
+```bash
+curl -X GET "http://localhost:4000/maps/get-suggestions?input=Howrah" \
+  -H "Authorization: Bearer <jwt-token>"
+```
+
+## Rides API
+
+This section documents the ride management endpoints: creating a ride, calculating fares, and managing ride status.
+
+### POST /rides/create
+
+**Description**
+
+- Create a new ride request for the authenticated user. Calculates total fare based on pickup and drop locations and vehicle type, generates a secure 6-digit OTP, and creates a ride record in `pending` status.
+
+**URL**
+
+- POST /rides/create
+
+**Headers**
+
+- `Content-Type: application/json`
+- `Authorization: Bearer <token>` or cookie `token`
+
+**Authentication**
+
+- Endpoint is protected by `authUser` middleware; provide a valid user JWT token.
+
+**Request body (JSON)**
+
+- `pickup`: string — required, minimum 3 characters (pickup location)
+- `drop`: string — required, minimum 3 characters (drop-off location)
+- `vehicleType`: string — required, must be one of `auto`, `car`, `moto`, or `motorcycle`
+
+Example:
+
+```json
+{
+  "pickup": "Howrah Railway Station",
+  "drop": "Dakshineswar Kali Temple",
+  "vehicleType": "car"
+}
+```
+
+**Validation / Errors**
+
+- 400 Bad Request — validation errors (invalid or missing pickup, drop, or vehicleType). Response example:
+
+```json
+{
+  "errors": [
+    { "msg": "Invalid Vehicle Type", "path": "vehicleType", "location": "body" }
+  ]
+}
+```
+
+- 401 Unauthorized — when authentication token is missing or invalid.
+- 500 Internal Server Error — server error during coordinate lookup, distance calculation, or database operation.
+
+**Success**
+
+- 201 Created — JSON body contains the created ride object:
+
+```json
+{
+  "_id": "66a1b2c3d4e5f6a7b8c9d0e1",
+  "user": "60f1c2d4a1b2c3d4e5f6a7b8",
+  "pickup": "Howrah Railway Station",
+  "destination": "Dakshineswar Kali Temple",
+  "fare": 268,
+  "status": "pending",
+  "otp": "492015"
+}
+```
+
+**Quick curl example**
+
+```bash
+curl -X POST http://localhost:4000/rides/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <jwt-token>" \
+  -d '{"pickup":"Howrah Railway Station","drop":"Dakshineswar Kali Temple","vehicleType":"car"}'
+```
+
+### GET /rides/get-fare
+
+**Description**
+
+- Calculates and returns estimated fares for available vehicle types (auto, car, moto) based on pickup and destination locations.
+
+**URL**
+
+- GET /rides/get-fare
+
+**Headers**
+
+- `Authorization: Bearer <token>` or cookie `token`
+
+**Authentication**
+
+- Endpoint is protected by `authUser` middleware; provide a valid user JWT token.
+
+**Query Parameters**
+
+- `pickup`: string — required, minimum 3 characters
+- `destination`: string — required, minimum 3 characters
+
+Example:
+`/rides/get-fare?pickup=Howrah%20Railway%20Station&destination=Dakshineswar%20Kali%20Temple`
+
+**Validation / Errors**
+
+- 400 Bad Request — validation errors (missing or invalid pickup or destination parameter). Response example:
+
+```json
+{
+  "errors": [
+    { "msg": "Invalid pickup", "param": "pickup", "location": "query" }
+  ]
+}
+```
+
+- 401 Unauthorized — when authentication token is missing or invalid.
+- 500 Internal Server Error — server error or location service distance/duration calculation failure.
+
+**Success**
+
+- 200 OK — JSON object containing calculated fares for each vehicle type. Example:
+
+```json
+{
+  "auto": 172,
+  "car": 268,
+  "moto": 133,
+  "motorcycle": 133
+}
+```
+
+**Quick curl example**
+
+```bash
+curl -X GET "http://localhost:4000/rides/get-fare?pickup=Howrah%20Railway%20Station&destination=Dakshineswar%20Kali%20Temple" \
+  -H "Authorization: Bearer <jwt-token>"
+```
+

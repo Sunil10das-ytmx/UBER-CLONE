@@ -10,10 +10,11 @@ const VehiclePanel = (props) => {
       id: 1,
       image: UberCar,
       name: "UberCar",
+      valueKey: "car",
       seats: 4,
       time: "2 mins away",
       description: "Affordable,compact rides",
-      price: "₹193.20",
+      price: props.fare?.car ? `₹${props.fare.car}` : "₹193.20",
       imageClass: "h-20",
       contentClass: "mr-4 w-1/2 pb-2 pt-2"
     },
@@ -21,10 +22,11 @@ const VehiclePanel = (props) => {
       id: 2,
       image: UberAuto,
       name: "UberAuto",
+      valueKey: "auto",
       seats: 4,
       time: "7 mins away",
       description: "Affordable,comfartable rides",
-      price: "₹118.20",
+      price: props.fare?.auto ? `₹${props.fare.auto}` : "₹118.20",
       imageClass: "h-20",
       contentClass: "mr-4 w-1/2 pb-2 pt-2"
     },
@@ -32,10 +34,11 @@ const VehiclePanel = (props) => {
       id: 3,
       image: UberBike,
       name: "Moto",
+      valueKey: "moto",
       seats: 1,
       time: "3 mins away",
       description: "Affordable motorcycle rides",
-      price: "₹65.17",
+      price: props.fare?.moto ? `₹${props.fare.moto}` : "₹65.17",
       imageClass: "h-20",
       contentClass: "-ml-5 mr-4 w-1/2 pb-2 pt-2"
     }
@@ -60,11 +63,8 @@ const VehiclePanel = (props) => {
         <div
           key={vehicle.id}
           onClick={() => {
-            props.setConfirmedRidePanel(true)
+            props.setConfirmedRidePanel(true);
             props.setSelectedVehicle(vehicle);
-
-            // We'll use this later
-            // props.setSelectedVehicle(vehicle)
           }}
           className='flex w-full items-center justify-between rounded-xl border-2 border-gray-500 active:border-black active:border-3 pr-9'
         >

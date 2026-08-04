@@ -1,8 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import UberPassenger from '../assets/UberPassenger.png';
 import { Link } from 'react-router-dom';
+import { formatAddress } from '../utils/formatAddress';
 
 const FinishRide = (props) => {
+    const [fare, setFare] = useState(null);
+    const pickupAddr = formatAddress(props.ride?.pickup || 'Howrah Railway Station', 'Howrah Railway Station');
+    const destAddr = formatAddress(props.ride?.destination || 'Dakshineswar Kali Temple', 'Dakshineswar Kali Temple');
+
+    useEffect(() => {
+        const pickup = props.ride?.pickup ;
+        const destination = props.ride?.destination ;
+
+        if (pickup && destination && !props.ride?.fare) {
+            axios
+                .get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
+                    params: { pickup, destination },
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                })
+                .then((res) => {
+                    setFare(res.data?.car || res.data?.auto || res.data?.moto || null);
+                })
+                .catch((err) => {
+                    console.error("Error fetching fare in FinishRide:", err);
+                });
+        }
+    }, [props.ride]);
+
+    const displayFare = props.ride?.fare ? `₹${props.ride.fare}` : fare ? fare : '';
+
     return (
         <div className='h-full flex flex-col justify-between select-none'>
             <div>
@@ -35,11 +64,11 @@ const FinishRide = (props) => {
                 {/* Ride Trip Locations & Fare Details */}
                 <div className='flex flex-col gap-2 px-2'>
                     {/* Pickup Location */}
-                    <div className='flex items-center gap-4 p-2'>
-                        <h3 className='text-2xl text-gray-700'><i className="ri-map-pin-user-fill"></i></h3>
-                        <div>
-                            <h3 className='text-xl font-medium'>{props.ride?.pickup || 'Howrah Railway Station'}</h3>
-                            <p className='text-sm text-gray-500'>Kolkata, West Bengal, 700076</p>
+                    <div className='flex items-center gap-4 p-2 min-w-0'>
+                        <h3 className='text-2xl text-gray-700 shrink-0'><i className="ri-map-pin-user-fill"></i></h3>
+                        <div className='overflow-hidden min-w-0'>
+                            <h3 className='text-lg font-semibold truncate'>{pickupAddr.title}</h3>
+                            {pickupAddr.subtext ? <p className='text-sm text-gray-500 truncate'>{pickupAddr.subtext}</p> : null}
                         </div>
                     </div>
 
@@ -52,11 +81,11 @@ const FinishRide = (props) => {
                     </div>
 
                     {/* Dropoff Location */}
-                    <div className='flex items-center gap-4 p-2 border-b border-gray-200'>
-                        <h3 className='text-2xl text-gray-700'><i className="ri-map-pin-2-fill"></i></h3>
-                        <div>
-                            <h3 className='text-xl font-medium'>{props.ride?.destination || 'Dakshineswar Kali Temple'}</h3>
-                            <p className='text-sm text-gray-500'>Kolkata, West Bengal, 700076</p>
+                    <div className='flex items-center gap-4 p-2 border-b border-gray-200 min-w-0'>
+                        <h3 className='text-2xl text-gray-700 shrink-0'><i className="ri-map-pin-2-fill"></i></h3>
+                        <div className='overflow-hidden min-w-0'>
+                            <h3 className='text-lg font-semibold truncate'>{destAddr.title}</h3>
+                            {destAddr.subtext ? <p className='text-sm text-gray-500 truncate'>{destAddr.subtext}</p> : null}
                         </div>
                     </div>
 
@@ -64,7 +93,7 @@ const FinishRide = (props) => {
                     <div className='flex items-center gap-4 p-2'>
                         <h3 className='text-2xl text-gray-700'><i className="ri-wallet-2-fill"></i></h3>
                         <div>
-                            <h3 className='text-xl font-bold'>₹{props.ride?.fare || '165.20'}</h3>
+                            <h3 className='text-xl font-bold'>{displayFare}</h3>
                             <p className='text-sm text-gray-500'>Cash Payment</p>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
 import UberLogo from "../assets/Uber-logo.png";
 import ubermap from "../assets/uber-map.gif";
 import { useGSAP } from "@gsap/react";
@@ -41,19 +42,112 @@ const Home = (props) => {
   const panelCloeRef = useRef(null);
   const vehiclePanelRef = useRef(null);
   const vehicleFoundRef = useRef(null);
+  const ridingRef = useRef(null);
   const inputRef = useRef(null);
   const confirmedRidePanelRef = useRef(null);
   const waitingForDriverRef = useRef(null);
 
   const [pickup, setPickup] = useState("");
-  const [panelOpen, setpanelOpen] = useState(false);
   const [destination, setDestination] = useState("");
+  const [panelOpen, setpanelOpen] = useState(false);
   const [vehiclePanelOpen, setvehiclePanelOpen] = useState(false);
   const [ConfirmedRidePanel, setConfirmedRidePanel] = useState(false);
   const [selectedVehicle, setSelectedVehicleState] = useState(null);
   const [selectedAddress, setSelectedAddressState] = useState(null);
   const [vehicleFound, setvehicleFound] = useState(false);
   const [waitingForDriver, setWaitingForDriver] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [activeField, setActiveField] = useState(null);
+  const [fare, setFare] = useState({});
+
+  const findTrip = async (pickupVal, destVal) => {
+    setvehiclePanelOpen(true);
+    setpanelOpen(false);
+
+    const getStr = (val) => {
+      if (!val) return "";
+      if (typeof val === "object") return val.place || val.fullAddress || "";
+      return String(val);
+    };
+
+    const pStr = getStr(pickupVal !== undefined ? pickupVal : pickup);
+    const dStr = getStr(destVal !== undefined ? destVal : destination);
+
+    if (pStr.trim().length >= 3 && dStr.trim().length >= 3) {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/rides/get-fare`,
+          {
+            params: { pickup: pStr.trim(), destination: dStr.trim() },
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setFare(response.data);
+      } catch (error) {
+        console.error("Error fetching fare:", error?.response?.data || error.message);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (vehiclePanelOpen && pickup.trim().length >= 3 && destination.trim().length >= 3) {
+      findTrip(pickup, destination);
+    }
+  }, [vehiclePanelOpen]);
+
+  const handlePickupChange = async (e) => {
+    const value = e.target.value;
+    setPickup(value);
+    setActiveField("pickup");
+    setpanelOpen(true);
+
+    if (value.trim().length >= 3) {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`,
+          {
+            params: { input: value },
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setSuggestions(response.data);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleDestinationChange = async (e) => {
+    const value = e.target.value;
+    setDestination(value);
+    setActiveField("destination");
+    setpanelOpen(true);
+
+    if (value.trim().length >= 3) {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`,
+          {
+            params: { input: value },
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setSuggestions(response.data);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    } else {
+      setSuggestions([]);
+    }
+  };
 
   const setSelectedAddress = (addr) => {
     setSelectedAddressState(addr);
@@ -198,56 +292,10 @@ const Home = (props) => {
           </h1>
         </div>
 
-
-        {/* <div className="absolute left-0 right-0 top-42.5 z-20">
-          <Swiper
-            modules={[Autoplay]}
-            autoplay={{
-              delay: 2500,
-              disableOnInteraction: false,
-            }}
-            loop
-            centeredSlides
-            slidesPerView={1}
-            spaceBetween={20}
-            className="w-full h-55"
-          >
-            {ubervehicle.map((vehicle) => {
-              const bgColor =
-                vehicle.id === 1
-                  ? "bg-sky-100"
-                  : vehicle.id === 2
-                    ? "bg-orange-100"
-                    : "bg-yellow-100";
-
-              return (
-                <SwiperSlide
-                  key={vehicle.id}
-                  className="flex! justify-center items-center h-55"
-                >
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                    className={`w-44 h-44 rounded-full ${bgColor} shadow-lg flex items-center justify-center`}
-                  >
-                    <img
-                      src={vehicle.src}
-                      alt=""
-                      className="w-32 h-32 object-contain select-none"
-                      draggable={false}
-                    />
-                  </motion.div>
-                </SwiperSlide>
-              );
-            })}
-          </Swiper>
-        </div> */}
-
         <div className=" flex flex-col justify-end absolute h-screen  top-0  w-full">
           <div
             ref={inputRef}
-            className="h-[30%] p-6 bg-white relative rounded-tr-3xl rounded-tl-3xl border-2 border-black "
+            className="h-[33%] p-6 bg-white relative rounded-tr-3xl rounded-tl-3xl border-2 border-black "
           >
             <h5
               ref={panelCloeRef}
@@ -259,7 +307,7 @@ const Home = (props) => {
               <i className="ri-arrow-down-wide-line"></i>
             </h5>
 
-            <h4 className="text-3xl font-semibold absolute top-2 left-29 ">
+            <h4 className="text-3xl font-semibold absolute top-5 left-29 ">
               Find a trip
             </h4>
             <form
@@ -268,15 +316,14 @@ const Home = (props) => {
               }}
               className="mt-7"
             >
-              <div className="line mt-3 absolute h-16 w-1 bottom-[17%] -translate-y-1/2 left-9 bg-gray-700 rounded-full"></div>
+              <div className="line mt-3 absolute h-16 w-1 bottom-[25%] -translate-y-1/2 left-9 bg-gray-700 rounded-full"></div>
               <input
                 onClick={() => {
                   setpanelOpen(true);
+                  setActiveField("pickup");
                 }}
                 value={pickup}
-                onChange={(e) => {
-                  setPickup(e.target.value);
-                }}
+                onChange={handlePickupChange}
                 className="bg-[#eee] px-12 py-2 text-base rounded-lg w-full mt-4 mb-4"
                 type="text"
                 placeholder="Add a pick up location"
@@ -285,23 +332,37 @@ const Home = (props) => {
               <input
                 onClick={() => {
                   setpanelOpen(true);
+                  setActiveField("destination");
                 }}
                 value={destination}
-                onChange={(e) => {
-                  setDestination(e.target.value);
-                }}
+                onChange={handleDestinationChange}
                 className="bg-[#eee] px-12 py-2 text-base rounded-lg w-full "
                 type="text"
                 placeholder="Enetr your destination"
               />
             </form>
+            <button
+              onClick={() => {
+                  findTrip()
+              }}
+              className="bg-black text-white px-12 py-2 text-base rounded-lg w-full mt-4 mb-4"
+            >
+              Find Trip
+            </button>
           </div>
 
           <div ref={panelRef} className=" bg-gray-200  h-0">
             <LocationSearchPanel
+              suggestions={suggestions}
               setpanelOpen={setpanelOpen}
               setvehiclePanelOpen={setvehiclePanelOpen}
               setSelectedAddress={setSelectedAddress}
+              pickup={pickup}
+              setPickup={setPickup}
+              destination={destination}
+              setDestination={setDestination}
+              activeField={activeField}
+              findTrip={findTrip}
             />
           </div>
         </div>
@@ -311,6 +372,7 @@ const Home = (props) => {
           className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
         >
           <VehiclePanel
+            fare={fare}
             setvehiclePanelOpen={setvehiclePanelOpen}
             setConfirmedRidePanel={setConfirmedRidePanel}
             setSelectedVehicle={setSelectedVehicle}
@@ -322,6 +384,7 @@ const Home = (props) => {
           className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
         >
           <ConfirmedRide
+            fare={fare}
             setvehicleFound={setvehicleFound}
             selectedVehicle={selectedVehicle}
             setConfirmedRidePanel={setConfirmedRidePanel}
@@ -334,6 +397,7 @@ const Home = (props) => {
           className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
         >
           <LookingforDriver
+            fare={fare}
             address={selectedAddress}
             selectedVehicle={selectedVehicle}
             setvehicleFound={setvehicleFound}
@@ -345,6 +409,7 @@ const Home = (props) => {
           className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-y-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
         >
           <WaitingforDriver
+            fare={fare}
             selectedVehicle={selectedVehicle}
             address={selectedAddress}
             setWaitingForDriver={setWaitingForDriver}
@@ -352,13 +417,13 @@ const Home = (props) => {
         </div>
 
         <div
-          // ref={confirmedRidePanelRef}
+          ref={ridingRef}
           className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
         >
           <Riding
-             selectedVehicle={selectedVehicle}
-             address={selectedAddress}
-             setWaitingForDriver={setWaitingForDriver}
+            fare={fare}
+            selectedVehicle={selectedVehicle}
+            address={selectedAddress}
           />
         </div>
       </div>

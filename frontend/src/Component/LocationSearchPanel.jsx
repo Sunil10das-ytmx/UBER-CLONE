@@ -203,32 +203,95 @@ export const westBengalAddresses = [
   },
 ];
 
-const LocationSearchPanel = (props) => {
+const LocationSearchPanel = ({
+  suggestions,
+  setPickup,
+  setDestination,
+  activeField,
+  setpanelOpen,
+  setvehiclePanelOpen,
+  setSelectedAddress,
+  pickup,
+  destination,
+  findTrip
+}) => {
+  const handleSelectSuggestion = (suggestionItem) => {
+    const text = typeof suggestionItem === "string" ? suggestionItem : suggestionItem.place;
+
+    let newPickup = pickup;
+    let newDestination = destination;
+
+    if (activeField === "pickup") {
+      setPickup(text);
+      newPickup = text;
+    } else if (activeField === "destination") {
+      setDestination(text);
+      newDestination = text;
+    }
+
+    let addressObj;
+    if (typeof suggestionItem === "string") {
+      const parts = suggestionItem.split(",").map((s) => s.trim()).filter(Boolean);
+      const placeName = parts[0] || suggestionItem;
+      const remaining = parts.slice(1).filter((p) => p.toLowerCase() !== "india");
+      addressObj = {
+        place: placeName,
+        city: remaining[0] || "",
+        state: remaining.slice(1).join(", "),
+        pincode: "",
+        fullAddress: suggestionItem
+      };
+    } else {
+      addressObj = suggestionItem;
+    }
+
+    setSelectedAddress?.(addressObj);
+
+    if (activeField === "destination" || (newPickup && newDestination)) {
+      setpanelOpen?.(false);
+      setvehiclePanelO?.(false)
+      findTrip?.(newPickup, newDestination);
+    }
+  };
+
   return (
     <>
       <div>
-        <div className="max-h-129 space-y-2  overflow-y-auto pr-2 pt-2 pl-2 pb-2">
-          {westBengalAddresses.map((address) => (
-            <div
-              key={address.id}
-              onClick={() => {
-                props.setSelectedAddress?.(address)
-                props.setvehiclePanelOpen(true)
-                props.setpanelOpen?.(false)
-              }}
-              className="flex items-start gap-3 rounded-xl active:border-black border border-slate-200 bg-slate-50 p-3"
-            >
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-500">
-                <i className="ri-map-pin-2-fill"></i>
+        <div className="max-h-129 space-y-2 overflow-y-auto pr-2 pt-2 pl-2 pb-2">
+          {suggestions && suggestions.length > 0 ? (
+            suggestions.map((elem, idx) => (
+              <div
+                key={idx}
+                onClick={() => handleSelectSuggestion(elem)}
+                className="flex items-start gap-3 rounded-xl cursor-pointer active:border-black border border-slate-200 bg-slate-50 p-3 hover:bg-slate-100 transition-all"
+              >
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-500">
+                  <i className="ri-map-pin-2-fill"></i>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800">{elem}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-slate-800">{address.place}</p>
-                <p className="text-sm text-slate-500">
-                  {address.city}, {address.state} • {address.pincode}
-                </p>
+            ))
+          ) : (
+            westBengalAddresses.map((address) => (
+              <div
+                key={address.id}
+                onClick={() => handleSelectSuggestion(address)}
+                className="flex items-start gap-3 rounded-xl cursor-pointer active:border-black border border-slate-200 bg-slate-50 p-3 hover:bg-slate-100 transition-all"
+              >
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-500">
+                  <i className="ri-map-pin-2-fill"></i>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800">{address.place}</p>
+                  <p className="text-sm text-slate-500">
+                    {address.city}, {address.state} • {address.pincode}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </>
