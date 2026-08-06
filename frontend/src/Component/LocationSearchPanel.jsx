@@ -249,8 +249,8 @@ const LocationSearchPanel = ({
 
     if (activeField === "destination" || (newPickup && newDestination)) {
       setpanelOpen?.(false);
-      setvehiclePanelO?.(false)
-      findTrip?.(newPickup, newDestination);
+      setvehiclePanelOpen?.(false)
+      // findTrip?.(newPickup, newDestination);
     }
   };
 

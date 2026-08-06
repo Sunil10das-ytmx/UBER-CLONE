@@ -59,6 +59,7 @@ const Home = (props) => {
   const [suggestions, setSuggestions] = useState([]);
   const [activeField, setActiveField] = useState(null);
   const [fare, setFare] = useState({});
+  const [vehicleType, setvehicleType] = useState(null)
 
   const findTrip = async (pickupVal, destVal) => {
     setvehiclePanelOpen(true);
@@ -273,6 +274,20 @@ const Home = (props) => {
     }
   }, [vehicleFound]);
 
+
+  async function createRide() {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create-ride`, {
+      pickup,
+      destination,
+      vehicleType
+    },{
+      heqaders: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      }
+    })
+  }
+
+
   return (
     <>
       <div className="h-screen relative overflow-hidden">
@@ -367,24 +382,20 @@ const Home = (props) => {
           </div>
         </div>
 
-        <div
-          ref={vehiclePanelRef}
-          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
-        >
+        <div ref={vehiclePanelRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
           <VehiclePanel
             fare={fare}
+            setvehicleType={setvehicleType}
             setvehiclePanelOpen={setvehiclePanelOpen}
             setConfirmedRidePanel={setConfirmedRidePanel}
             setSelectedVehicle={setSelectedVehicle}
           />
         </div>
 
-        <div
-          ref={confirmedRidePanelRef}
-          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
-        >
+        <div ref={confirmedRidePanelRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
           <ConfirmedRide
             fare={fare}
+            createRide={createRide}
             setvehicleFound={setvehicleFound}
             selectedVehicle={selectedVehicle}
             setConfirmedRidePanel={setConfirmedRidePanel}
@@ -392,10 +403,7 @@ const Home = (props) => {
           />
         </div>
 
-        <div
-          ref={vehicleFoundRef}
-          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
-        >
+        <div ref={vehicleFoundRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
           <LookingforDriver
             fare={fare}
             address={selectedAddress}
@@ -404,10 +412,7 @@ const Home = (props) => {
           />
         </div>
 
-        <div
-          ref={waitingForDriverRef}
-          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-y-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
-        >
+        <div ref={waitingForDriverRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-y-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
           <WaitingforDriver
             fare={fare}
             selectedVehicle={selectedVehicle}
@@ -416,10 +421,7 @@ const Home = (props) => {
           />
         </div>
 
-        <div
-          ref={ridingRef}
-          className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3"
-        >
+        <div ref={ridingRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
           <Riding
             fare={fare}
             selectedVehicle={selectedVehicle}

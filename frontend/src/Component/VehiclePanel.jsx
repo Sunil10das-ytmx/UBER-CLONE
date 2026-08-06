@@ -65,6 +65,7 @@ const VehiclePanel = (props) => {
           onClick={() => {
             props.setConfirmedRidePanel(true);
             props.setSelectedVehicle(vehicle);
+            props.setvehicleType(vehicle.valueKey)
           }}
           className='flex w-full items-center justify-between rounded-xl border-2 border-gray-500 active:border-black active:border-3 pr-9'
         >

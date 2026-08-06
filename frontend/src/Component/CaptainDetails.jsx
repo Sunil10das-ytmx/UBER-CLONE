@@ -1,7 +1,12 @@
-import React from 'react'
+import React,{useContext} from 'react'
 import UberDriver from '../assets/UberDriver.png'
+import {CaptainDataContext} from '../context/CaptianContext.jsx'
 
-const captainDeatils = () => {
+
+const CaptainDetails = () => {
+
+    const { captain } = useContext(CaptainDataContext)
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -9,7 +14,9 @@ const captainDeatils = () => {
             <img 
             className="w-12 h-12"
             src={UberDriver}  alt="UberDriver"/>
-              <h4 className=" font-bold ">SUNIL DAS</h4>
+              <h4 className="text-lg font-bold capitalize">
+                {captain?.fullname?.firstname + " " + captain?.fullname?.lastname}
+              </h4>
             </div>
             <div className=" flex flex-col">
               <h4 className="text-xl font-bold">₹665.40</h4>
@@ -38,4 +45,4 @@ const captainDeatils = () => {
   )
 }
 
-export default captainDeatils
+export default CaptainDetails
