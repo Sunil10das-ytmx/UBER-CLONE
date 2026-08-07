@@ -204,7 +204,9 @@ const WaitingforDriver = (props) => {
           <i className="ri-arrow-down-wide-line"></i>
         </h3>
 
-        <h3 className="text-2xl font-bold mb-4 pr-10">Driver is on the way</h3>
+        <div className="flex justify-between items-start mb-4 pr-8">
+          <h3 className="text-2xl font-bold">Driver is on the way</h3>
+        </div>
 
         <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
           <div className="relative flex items-center h-20 min-w-35">
@@ -237,7 +239,25 @@ const WaitingforDriver = (props) => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 w-full">
+        <div className=" absolute left-5 top-36">
+          {props.ride?.otp ? (
+            <div className="flex flex-col items-start shrink-0">
+              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">YOUR OTP</span>
+              <div className="bg-amber-400 text-black font-mono text-xl font-black px-3 py-1 rounded-xl shadow-sm border border-amber-500 tracking-widest mt-0.5">
+                {props.ride.otp}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-start shrink-0">
+              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">YOUR OTP</span>
+              <div className="bg-gray-100 text-gray-700 font  -mono text-xl font-bold px-3 py-1 rounded-xl border border-gray-300 tracking-widest mt-0.5">
+                ----
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-4 w-full mt-9">
           <div className="flex items-center gap-4 p-2 border-b border-gray-100 min-w-0">
             <h3 className="text-xl text-gray-700 shrink-0">
               <i className="ri-map-pin-2-fill"></i>
@@ -253,6 +273,8 @@ const WaitingforDriver = (props) => {
               ) : null}
             </div>
           </div>
+
+
 
           <div className="flex items-center gap-4 p-2">
             <h3 className="text-xl text-gray-700">

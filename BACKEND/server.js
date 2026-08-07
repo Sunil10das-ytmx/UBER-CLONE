@@ -1,11 +1,13 @@
 const http = require('http');
 const app = require('./app');
+const { initializeSocket } = require('./socket');
 
 let port = parseInt(process.env.PORT, 10) || 3000;
 const MAX_PORT_TRIES = 10;
 
 function startServer(currentPort, attemptsLeft) {
     const server = http.createServer(app);
+    initializeSocket(server);
 
     server.on('error', (err) => {
         if (err && err.code === 'EADDRINUSE') {

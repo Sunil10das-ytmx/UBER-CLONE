@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import axios from "axios";
 import UberLogo from "../assets/Uber-logo.png";
 import ubermap from "../assets/uber-map.gif";
@@ -15,7 +15,8 @@ import LookingforDriver from "../Component/LookingforDriver";
 import UberCar from "../assets/UberCar.png";
 import UberBike from "../assets/UberBike.webp";
 import UberAuto from "../assets/UberAuto.png";
-
+import {SocketContext} from '../context/SocketContext'
+import {UserDataContext} from '../context/UserContext'
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -38,6 +39,9 @@ const Home = (props) => {
     },
   ];
 
+  const {socket} = useContext(SocketContext)
+  const {user} = useContext(UserDataContext)
+  
   const panelRef = useRef(null);
   const panelCloeRef = useRef(null);
   const vehiclePanelRef = useRef(null);
@@ -59,7 +63,8 @@ const Home = (props) => {
   const [suggestions, setSuggestions] = useState([]);
   const [activeField, setActiveField] = useState(null);
   const [fare, setFare] = useState({});
-  const [vehicleType, setvehicleType] = useState(null)
+  const [vehicleType, setvehicleType] = useState(null);
+  const [ride, setRide] = useState(null);
 
   const findTrip = async (pickupVal, destVal) => {
     setvehiclePanelOpen(true);
@@ -91,6 +96,12 @@ const Home = (props) => {
       }
     }
   };
+
+  useEffect(()=>{
+    
+    socket.emit("join",{userType:"user", userId:user?._id})
+  },[user])
+
 
   useEffect(() => {
     if (vehiclePanelOpen && pickup.trim().length >= 3 && destination.trim().length >= 3) {
@@ -264,27 +275,48 @@ const Home = (props) => {
   );
 
   useEffect(() => {
-    if (vehicleFound) {
-      const timer = setTimeout(() => {
-        setvehicleFound(false);
-        setvehiclePanelOpen(false);
-        setWaitingForDriver(true);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [vehicleFound]);
+    const handleRideConfirmed = (confirmedRide) => {
+      console.log("Ride confirmed by captain:", confirmedRide);
+      setvehicleFound(false);
+      setvehiclePanelOpen(false);
+      setWaitingForDriver(true);
+      setRide(confirmedRide);
+    };
+
+    socket.on('ride-confirmed', handleRideConfirmed);
+
+    return () => {
+      socket.off('ride-confirmed', handleRideConfirmed);
+    };
+  }, [socket]);
 
 
   async function createRide() {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create-ride`, {
-      pickup,
-      destination,
-      vehicleType
-    },{
-      heqaders: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      }
-    })
+    try {
+      const pStr = pickup && pickup.trim().length >= 3 ? pickup.trim() : "Howrah Railway Station";
+      const dStr = destination && destination.trim().length >= 3 ? destination.trim() : "Dakshineswar Kali Temple";
+      const vType = vehicleType || selectedVehicle?.valueKey || "car";
+
+      console.log("Creating ride payload:", { pickup: pStr, drop: dStr, vehicleType: vType });
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/rides/create`,
+        {
+          pickup: pStr,
+          drop: dStr,
+          vehicleType: vType
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      console.log("Created ride successfully:", response.data);
+      setRide(response.data);
+    } catch (error) {
+      console.error("Error creating ride:", error?.response?.data || error.message);
+    }
   }
 
 
@@ -414,6 +446,7 @@ const Home = (props) => {
 
         <div ref={waitingForDriverRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-y-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
           <WaitingforDriver
+            ride={ride}
             fare={fare}
             selectedVehicle={selectedVehicle}
             address={selectedAddress}

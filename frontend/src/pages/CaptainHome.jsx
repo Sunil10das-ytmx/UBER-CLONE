@@ -1,47 +1,67 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect,useContext } from "react";
 import { Link } from "react-router-dom"; // TEMPORARY: Using location state for navigate routing
 import UberMap from "../assets/Uber-map.gif";
 import UberLogo from '../assets/Uber-logo.png'
 import CaptainDetails from "../Component/CaptainDetails";
 import RidePopUp from "../Component/RidePopUp";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
 import ConfirmedRidePopUp from "../Component/ConfirmedRidePopUp";
+import {SocketContext} from '../context/SocketContext'
+import {CaptainDataContext} from '../context/CaptianContext'
 
 const CaptainHome = (props) => {
   const RidePopUpRef = useRef(null)
   const ConfirmedRidePopUpRef = useRef(null)
 
-  const [ridePopUpPanel, setRidePopUpPanel] = useState(true)
+  const [ridePopUpPanel, setRidePopUpPanel] = useState(false)
   const [ConfirmedRidePopUpPanel, setConfirmedRidePopUpPanel] = useState(false)
+  const [ride,setRide]= useState(null)
 
-  useGSAP(function () {
-    if (ridePopUpPanel) {
-      gsap.to(RidePopUpRef.current, {
-        transform: "translateY(0)",
-      });
-    } else {
-      gsap.to(RidePopUpRef.current, {
-        transform: "translateY(100%)",
-      });
-    }
-  },
-    [ridePopUpPanel],
-  );
+  const ridePanelClasses = `fixed bottom-0 left-0 right-0 z-20 flex flex-col gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3 transition-transform duration-300 ${ridePopUpPanel ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`;
+  const confirmedPanelClasses = `fixed bottom-0 left-0 right-0 z-30 w-full h-screen flex flex-col gap-3 bg-white border-2 border-black p-3 transition-transform duration-300 ${ConfirmedRidePopUpPanel ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`;
 
-  useGSAP(function () {
-    if (ConfirmedRidePopUpPanel) {
-      gsap.to(ConfirmedRidePopUpRef.current, {
-        transform: "translateY(0)",
-      });
-    } else {
-      gsap.to(ConfirmedRidePopUpRef.current, {
-        transform: "translateY(100%)",
-      });
-    }
-  },
-    [ConfirmedRidePopUpPanel],
-  );
+  const {socket} = useContext(SocketContext)
+  const {captain} = useContext(CaptainDataContext)
+
+
+  useEffect(() => {
+    if (!captain?._id) return;
+
+    socket.emit("join", { userType: "captain", userId: captain._id });
+
+    const updateLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          socket.emit('update-location-captain', {
+            userId: captain._id,
+            location: {
+              ltd: position.coords.latitude,
+              lng: position.coords.longitude
+            }
+          });
+        });
+      }
+    };
+
+    const locationInterval = setInterval(updateLocation, 10000);
+    updateLocation();
+
+    return () => clearInterval(locationInterval);
+  }, [captain]);
+
+  useEffect(() => {
+    const handleNewRide = (data) => {
+      console.log('Received new-ride event:', data);
+      setRide(data);
+      setRidePopUpPanel(true);
+    };
+
+    socket.on('new-ride', handleNewRide);
+
+    return () => {
+      socket.off('new-ride', handleNewRide);
+    };
+  }, [socket]);
+  
 
   return (
     <>
@@ -68,17 +88,18 @@ const CaptainHome = (props) => {
           <CaptainDetails />
         </div>
 
-        <div ref={RidePopUpRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-y-full  gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
-          <RidePopUp setRidePopUpPanel={setRidePopUpPanel} setConfirmedRidePopUpPanel={setConfirmedRidePopUpPanel} />
+        <div ref={RidePopUpRef} className={ridePanelClasses}>
+          <RidePopUp 
+          ride={ride}
+          setRidePopUpPanel={setRidePopUpPanel} setConfirmedRidePopUpPanel={setConfirmedRidePopUpPanel} />
         </div>
 
-        <div ref={ConfirmedRidePopUpRef} className="fixed bottom-0 left-0 right-0 z-10 w-full h-screen flex flex-col translate-y-full  gap-3 bg-white border-2 border-black p-3">
-          <ConfirmedRidePopUp setConfirmedRidePopUpPanel={setConfirmedRidePopUpPanel} setRidePopUpPanel={setRidePopUpPanel} />
+        <div ref={ConfirmedRidePopUpRef} className={confirmedPanelClasses}>
+          <ConfirmedRidePopUp ride={ride} setConfirmedRidePopUpPanel={setConfirmedRidePopUpPanel} setRidePopUpPanel={setRidePopUpPanel} />
         </div>
 
       </div>
     </>
   );
-};
-
+}
 export default CaptainHome;

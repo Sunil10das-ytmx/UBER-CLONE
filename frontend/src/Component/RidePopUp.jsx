@@ -37,6 +37,27 @@ const RidePopUp = (props) => {
     ? `₹${fare}`
     : '₹165.20';
 
+  const acceptRide = async () => {
+    props.setConfirmedRidePopUpPanel(true);
+    props.setRidePopUpPanel(false);
+
+    try {
+      if (props.ride?._id) {
+        await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
+          { rideId: props.ride._id },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+      }
+    } catch (err) {
+      console.error("Error accepting ride:", err?.response?.data || err.message);
+    }
+  };
+
   return (
     <>
       <div>
@@ -48,7 +69,9 @@ const RidePopUp = (props) => {
             <div className='flex items-center justify-between bg-amber-500 p-4 rounded-3xl'>
                 <div className='flex items-center justify-start gap-3'>
                 <img className='w-15 h-15 border-4 border-black rounded-full' src={UberPassenger} alt='UberPassenger'/>
-                <h4 className='text-xl font-semibold'>Sunil Das</h4>
+                <h4 className='text-xl font-semibold'>
+                  {props.ride?.user?.fullname ? `${props.ride.user.fullname.firstname || ''} ${props.ride.user.fullname.lastname || ''}` : 'Passenger'}
+                </h4>
             </div>
             <div className='flex'>
                 <i className=" text-xl ri-map-pin-range-line"></i>
@@ -69,9 +92,7 @@ const RidePopUp = (props) => {
               </div> 
           </div>
           <div className='flex gap-3'>
-            <button onClick={()=>{
-              props.setConfirmedRidePopUpPanel(true)
-            }} className='w-full bg-green-600 text-white font-semibold p-2 rounded-lg'>Accpet</button>
+            <button onClick={acceptRide} className='w-full bg-green-600 text-white font-semibold p-2 rounded-lg'>Accept</button>
           <button onClick={()=>{
             props.setRidePopUpPanel(false)
           }} className='w-full bg-gray-400 text-red-500 font-semibold p-2 rounded-lg'>Reject</button>
