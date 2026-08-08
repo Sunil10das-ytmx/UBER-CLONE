@@ -368,12 +368,12 @@ const Home = (props) => {
         </div>
 
         <img
-          className="w-35 absolute left-30 top-5 z-[10]"
+          className="w-35 absolute left-30 top-5 z-1000"
           src={UberLogo}
           alt="uber logo"
         />
 
-        <div className="absolute top-28 left-1/2 -translate-x-1/2 text-center z-[10]">
+        <div className="absolute top-28 left-1/2 -translate-x-1/2 text-center z-1000">
           <h4 className="text-sm font-semibold uppercase tracking-[0.55em] text-zinc-700">
             FOR YOU
           </h4>
@@ -383,7 +383,7 @@ const Home = (props) => {
           </h1>
         </div>
 
-        <div className="flex flex-col justify-end absolute h-screen top-0 w-full z-[10] pointer-events-none">
+        <div className="flex flex-col justify-end absolute h-screen top-0 w-full z-1000 pointer-events-none">
           <div
             ref={inputRef}
             className="h-[33%] p-6 bg-white relative rounded-tr-3xl rounded-tl-3xl border-2 border-black pointer-events-auto"

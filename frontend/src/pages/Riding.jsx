@@ -226,7 +226,7 @@ const Riding = (props) => {
   return (
     <>
       <div className="h-screen">
-        <Link to='/home' className='fixed right-2 top-2 h-10 w-10 bg-white flex items-center justify-center rounded-full z-[1001] shadow-md'>
+        <Link to='/home' className='fixed right-2 top-2 h-10 w-10 bg-white flex items-center justify-center rounded-full z-1000 shadow-md'>
                 <i className="text-lg font-medium ri-home-5-line"></i>
             </Link>
         <div className="h-1/2 relative overflow-hidden">

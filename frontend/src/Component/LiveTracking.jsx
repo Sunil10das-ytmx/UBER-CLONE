@@ -234,7 +234,7 @@ const LiveTracking = ({ height = "100%", className = "", showInfoCard = true, on
       <div ref={mapContainerRef} className="w-full h-full" />
 
       {/* Floating Status Badge */}
-      <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md border border-gray-200 text-xs font-semibold text-gray-800">
+      <div className="absolute top-4 left-4 z-1000 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md border border-gray-200 text-xs font-semibold text-gray-800">
         <span className={`w-2.5 h-2.5 rounded-full ${isTracking ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
         <span>{isTracking ? 'LocationIQ Live Tracking' : 'Offline / Standby'}</span>
       </div>
@@ -250,7 +250,7 @@ const LiveTracking = ({ height = "100%", className = "", showInfoCard = true, on
 
       {/* Location Info Card Overlay */}
       {showInfoCard && (
-        <div className="absolute bottom-4 left-4 right-4 z-[1000] bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-gray-100 flex items-center justify-between gap-3">
+        <div className="absolute bottom-4 left-4 right-4 z-1000 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-xl border border-gray-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
               <i className="ri-map-pin-2-fill text-lg"></i>
@@ -272,7 +272,7 @@ const LiveTracking = ({ height = "100%", className = "", showInfoCard = true, on
 
       {/* Permission Warning Overlay */}
       {errorMsg && (
-        <div className="absolute top-16 left-4 right-4 z-[1000] bg-amber-50 border border-amber-200 text-amber-800 px-3.5 py-2.5 rounded-xl text-xs flex items-center justify-between shadow-md">
+        <div className="absolute top-16 left-4 right-4 z-1000 bg-amber-50 border border-amber-200 text-amber-800 px-3.5 py-2.5 rounded-xl text-xs flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2">
             <i className="ri-alert-line text-amber-600 text-base shrink-0"></i>
             <span>{errorMsg}</span>
