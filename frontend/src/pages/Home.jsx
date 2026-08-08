@@ -22,6 +22,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import WaitingforDriver from "../Component/WaitingforDriver";
 import Riding from "./Riding";
+import { toast } from "react-toastify";
 
 const Home = (props) => {
   const ubervehicle = [
@@ -287,6 +288,20 @@ const Home = (props) => {
 
     return () => {
       socket.off('ride-confirmed', handleRideConfirmed);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    const handleRideRejected = () => {
+      setvehicleFound(false);
+      setvehiclePanelOpen(false);
+      toast.error("The captain rejected your ride. Please try again.");
+    };
+
+    socket.on('ride-rejected', handleRideRejected);
+
+    return () => {
+      socket.off('ride-rejected', handleRideRejected);
     };
   }, [socket]);
 

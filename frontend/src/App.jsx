@@ -13,6 +13,8 @@ import UserprotectWrapper from './pages/UserprotectWrapper'
 import CaptainProtectWrapper from './pages/CaptainProtectWrapper'
 import Riding from './pages/Riding'
 import CaptainRiding from './pages/CaptainRiding'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const App = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -20,6 +22,7 @@ const App = () => {
 
   return (
       <div>
+        <ToastContainer position='top-right' autoClose={4000} />
         <Routes>
           <Route path='/' element={<Start/>} />
           <Route path='/home' element={

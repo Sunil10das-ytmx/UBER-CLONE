@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import axios from 'axios'
 import UberPassenger from '../assets/UberPassenger.png' 
 import { formatAddress } from '../utils/formatAddress'
+import { SocketContext } from '../context/SocketContext'
 
 const RidePopUp = (props) => {
   const [fare, setFare] = useState(null);
+  const { socket } = useContext(SocketContext);
   const rawAddr = props.address || props.ride?.destination || 'Dakshineswar Kali Temple';
   const formattedAddr = formatAddress(rawAddr, 'Dakshineswar Kali Temple');
 
@@ -36,6 +38,16 @@ const RidePopUp = (props) => {
     : fare
     ? `₹${fare}`
     : '₹165.20';
+
+  const rejectRide = () => {
+    const userId = props.ride?.user?._id || props.ride?.user;
+
+    socket.emit('reject-ride', {
+      rideId: props.ride?._id,
+      userId,
+    });
+    props.setRidePopUpPanel(false);
+  };
 
   const acceptRide = async () => {
     props.setConfirmedRidePopUpPanel(true);
@@ -93,9 +105,7 @@ const RidePopUp = (props) => {
           </div>
           <div className='flex gap-3'>
             <button onClick={acceptRide} className='w-full bg-green-600 text-white font-semibold p-2 rounded-lg'>Accept</button>
-          <button onClick={()=>{
-            props.setRidePopUpPanel(false)
-          }} className='w-full bg-gray-400 text-red-500 font-semibold p-2 rounded-lg'>Reject</button>
+          <button onClick={rejectRide} className='w-full bg-gray-400 text-red-500 font-semibold p-2 rounded-lg'>Reject</button>
           </div>
         </div>
     </>

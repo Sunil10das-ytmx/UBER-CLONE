@@ -45,6 +45,12 @@ function initializeSocket(server) {
             });
         });
 
+        socket.on('reject-ride', ({ userId, rideId }) => {
+            if (!userId) return;
+
+            io.to(`user_${userId}`).emit('ride-rejected', { rideId });
+        });
+
         socket.on('disconnect', () => {
             console.log(`Client disconnected: ${socket.id}`);
         });
