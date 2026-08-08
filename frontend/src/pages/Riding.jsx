@@ -1,6 +1,7 @@
-import React from "react";
-import { Link, useLocation } from 'react-router-dom'  // TEMPORARY: Using location state for navigate routing
+import React, { useContext } from "react";
+import { Link, useLocation, useNavigate } from 'react-router-dom'  // TEMPORARY: Using location state for navigate routing
 import { formatAddress } from "../utils/formatAddress";
+import { SocketContext } from '../context/SocketContext';
 import UberMap from "../assets/Uber-map.gif";
 import uberDriver from "../assets/UberDriver.png";
 import UberCar from "../assets/UberCar.png";
@@ -8,11 +9,34 @@ import UberBike from "../assets/UberBike.webp";
 import UberAuto from "../assets/UberAuto.png";
 
 const Riding = (props) => {
-  const formattedAddr = formatAddress(props.address, "Pickup Point");
-  // TEMPORARY: Read state passed via navigate('/riding', { state: { selectedVehicle, address } })
-  // const location = useLocation();
-  // const selectedVehicle = props.selectedVehicle || location.state?.selectedVehicle;
-  // const address = props.address || location.state?.address;
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const { socket } = useContext(SocketContext);
+  const ride = state?.ride || props.ride;
+  const pickupAddress = formatAddress(
+    ride?.pickup || props.pickup,
+    "Pickup Point"
+  );
+  const destinationAddress = formatAddress(
+    ride?.destination || props.destination || props.address,
+    "Drop-off Point"
+  );
+  const paymentAmount = ride?.fare != null
+    ? `₹${ride.fare}`
+    : props.selectedVehicle?.price || "₹0";
+
+  const handlePayment = (event) => {
+    event.preventDefault();
+
+    const captainId = ride?.captain?._id || ride?.captain;
+    if (!ride?._id || !captainId) {
+      return;
+    }
+
+    socket.emit('ride-paid', { rideId: ride._id, captainId });
+    navigate('/home');
+  };
+
   const uberdrivers = [
     // ===================== CARS =====================
     {
@@ -246,15 +270,37 @@ const Riding = (props) => {
           <div className="flex flex-col gap-4 w-full">
             <div className="flex items-center gap-4 p-2 border-b border-gray-100 min-w-0">
               <h3 className="text-xl text-gray-700 shrink-0">
+                <i className="ri-map-pin-user-fill"></i>
+              </h3>
+              <div className="overflow-hidden min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Pickup
+                </p>
+                <h3 className="text-lg font-semibold truncate">
+                  {pickupAddress.title}
+                </h3>
+                {pickupAddress.subtext ? (
+                  <p className="text-sm text-gray-500 truncate">
+                    {pickupAddress.subtext}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-2 border-b border-gray-100 min-w-0">
+              <h3 className="text-xl text-gray-700 shrink-0">
                 <i className="ri-map-pin-2-fill"></i>
               </h3>
               <div className="overflow-hidden min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Drop-off
+                </p>
                 <h3 className="text-lg font-semibold truncate">
-                  {formattedAddr.title}
+                  {destinationAddress.title}
                 </h3>
-                {formattedAddr.subtext ? (
+                {destinationAddress.subtext ? (
                   <p className="text-sm text-gray-500 truncate">
-                    {formattedAddr.subtext}
+                    {destinationAddress.subtext}
                   </p>
                 ) : null}
               </div>
@@ -266,19 +312,20 @@ const Riding = (props) => {
               </h3>
               <div>
                 <h3 className="text-lg font-semibold">
-                  {props.selectedVehicle?.price || (props.fare && props.selectedVehicle?.valueKey && props.fare[props.selectedVehicle.valueKey] ? `₹${props.fare[props.selectedVehicle.valueKey]}` : "₹0")}
+                  {paymentAmount}
                 </h3>
                 <p className="text-sm text-gray-500">Cash payment</p>
               </div>
             </div>
           </div>
         
-          <button
-            onClick={() => {}}
-            className="w-full bg-green-600 text-white font-semibold p-2 rounded-lg absolute bottom-2"
+          <Link
+            to='/home'
+            onClick={handlePayment}
+            className="w-full bg-green-600 text-white font-semibold p-2 rounded-lg absolute bottom-2 text-center"
           >
-            Payment
-          </button>
+            Pay {paymentAmount}
+          </Link>
         </div>
       </div>
     </>

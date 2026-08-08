@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import UberLogo from "../assets/Uber-logo.png";
 import ubermap from "../assets/uber-map.gif";
@@ -66,6 +67,8 @@ const Home = (props) => {
   const [fare, setFare] = useState({});
   const [vehicleType, setvehicleType] = useState(null);
   const [ride, setRide] = useState(null);
+
+  const navigate = useNavigate()
 
   const findTrip = async (pickupVal, destVal) => {
     setvehiclePanelOpen(true);
@@ -292,6 +295,19 @@ const Home = (props) => {
   }, [socket]);
 
   useEffect(() => {
+    const handleRideStarted = (startedRide) => {
+      setWaitingForDriver(false);
+      navigate('/riding', { state: { ride: startedRide } });
+    };
+
+    socket.on('ride-started', handleRideStarted);
+
+    return () => {
+      socket.off('ride-started', handleRideStarted);
+    };
+  }, [navigate, socket]);
+
+  useEffect(() => {
     const handleRideRejected = () => {
       setvehicleFound(false);
       setvehiclePanelOpen(false);
@@ -465,6 +481,8 @@ const Home = (props) => {
             fare={fare}
             selectedVehicle={selectedVehicle}
             address={selectedAddress}
+            pickup={pickup}
+            destination={destination}
             setWaitingForDriver={setWaitingForDriver}
           />
         </div>

@@ -6,7 +6,14 @@ import UberBike from "../assets/UberBike.webp";
 import UberAuto from "../assets/UberAuto.png";
 
 const WaitingforDriver = (props) => {
-  const formattedAddr = formatAddress(props.address, "Pickup Point");
+  const pickupAddress = formatAddress(
+    props.ride?.pickup || props.pickup,
+    "Pickup Point"
+  );
+  const destinationAddress = formatAddress(
+    props.ride?.destination || props.destination || props.address,
+    "Drop-off Point"
+  );
   const uberdrivers = [
     // ===================== CARS =====================
     {
@@ -260,15 +267,37 @@ const WaitingforDriver = (props) => {
         <div className="flex flex-col gap-4 w-full mt-9">
           <div className="flex items-center gap-4 p-2 border-b border-gray-100 min-w-0">
             <h3 className="text-xl text-gray-700 shrink-0">
+              <i className="ri-map-pin-user-fill"></i>
+            </h3>
+            <div className="overflow-hidden min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Pickup
+              </p>
+              <h3 className="text-lg font-semibold truncate">
+                {pickupAddress.title}
+              </h3>
+              {pickupAddress.subtext ? (
+                <p className="text-sm text-gray-500 truncate">
+                  {pickupAddress.subtext}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 p-2 border-b border-gray-100 min-w-0">
+            <h3 className="text-xl text-gray-700 shrink-0">
               <i className="ri-map-pin-2-fill"></i>
             </h3>
             <div className="overflow-hidden min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Drop-off
+              </p>
               <h3 className="text-lg font-semibold truncate">
-                {formattedAddr.title}
+                {destinationAddress.title}
               </h3>
-              {formattedAddr.subtext ? (
+              {destinationAddress.subtext ? (
                 <p className="text-sm text-gray-500 truncate">
-                  {formattedAddr.subtext}
+                  {destinationAddress.subtext}
                 </p>
               ) : null}
             </div>
@@ -282,7 +311,9 @@ const WaitingforDriver = (props) => {
             </h3>
             <div>
               <h3 className="text-lg font-semibold">
-                {props.selectedVehicle?.price || (props.fare && props.selectedVehicle?.valueKey && props.fare[props.selectedVehicle.valueKey] ? `₹${props.fare[props.selectedVehicle.valueKey]}` : "₹0")}
+                {props.ride?.fare != null
+                  ? `₹${props.ride.fare}`
+                  : props.selectedVehicle?.price || (props.fare && props.selectedVehicle?.valueKey && props.fare[props.selectedVehicle.valueKey] ? `₹${props.fare[props.selectedVehicle.valueKey]}` : "₹0")}
               </h3>
               <p className="text-sm text-gray-500">Cash payment</p>
             </div>

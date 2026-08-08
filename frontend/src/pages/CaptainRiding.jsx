@@ -1,15 +1,44 @@
-import React,{useState,useRef} from 'react'
+import React,{useState,useRef,useEffect,useContext} from 'react'
 import UberLogo from '../assets/Uber-logo.png'
 import UberMap from "../assets/Uber-map.gif";
 import { Link } from "react-router-dom"; 
+import { useLocation } from "react-router-dom";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import FinishRide from '../Component/FinishRide';
+import { SocketContext } from '../context/SocketContext';
+import { toast } from 'react-toastify';
 
 const CaptainRiding = () => {
 const finishRef = useRef(null)
+const { state } = useLocation();
+const ride = state?.ride;
 
 const [finishRidePanel, setFinishRidePanel] = useState(false)
+const [paymentReceived, setPaymentReceived] = useState(false)
+const { socket } = useContext(SocketContext)
+
+useEffect(() => {
+    const captainId = ride?.captain?._id || ride?.captain;
+    if (captainId) {
+      socket.emit('join', { userType: 'captain', userId: captainId });
+    }
+  }, [ride, socket]);
+
+  useEffect(() => {
+    const handleRidePaid = ({ rideId }) => {
+      if (rideId !== ride?._id) return;
+
+      setPaymentReceived(true);
+      toast.success('Passenger payment received. You can complete the ride.');
+    };
+
+    socket.on('ride-paid', handleRidePaid);
+
+    return () => {
+      socket.off('ride-paid', handleRidePaid);
+    };
+  }, [ride?._id, socket]);
 
     useGSAP(function () {
     if (finishRidePanel) {
@@ -58,7 +87,11 @@ const [finishRidePanel, setFinishRidePanel] = useState(false)
         </div>
 
         <div ref={finishRef} className="fixed bottom-0 left-0 right-0 z-10 w-full h-screen flex flex-col translate-y-full gap-3 bg-white border-2 border-black p-3">
-          <FinishRide setFinishRidePanel={setFinishRidePanel} />
+          <FinishRide
+            ride={ride}
+            paymentReceived={paymentReceived}
+            setFinishRidePanel={setFinishRidePanel}
+          />
         </div>
         </div>
     </>

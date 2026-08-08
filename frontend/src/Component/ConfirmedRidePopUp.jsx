@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react'
+ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import UberPassenger from '../assets/UberPassenger.png'
 import { Link } from "react-router-dom";
 import { formatAddress } from '../utils/formatAddress';
+import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
+
 
 const ConfirmedRIdePopUp = (props) => {
     const [otp, setOtp] = useState('')
     const [fare, setFare] = useState(null)
     const rawAddr = props.address || props.ride?.destination || 'Dakshineswar Kali Temple';
     const formattedAddr = formatAddress(rawAddr, 'Dakshineswar Kali Temple');
+
+    const navigator = useNavigate()
 
     useEffect(() => {
         const pickup = props.ride?.pickup || props.pickup || "Howrah Railway Station";
@@ -39,8 +44,29 @@ const ConfirmedRIdePopUp = (props) => {
         ? `₹${fare}`
         : '₹165.20';
 
-    const submitOpt = (e) => {
+    const submitOpt = async (e) => {
         e.preventDefault()
+        try {
+            const response = await axios.get(
+                `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
+                {
+                    params: {
+                        rideId: props.ride?._id,
+                        otp,
+                    },
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                }
+            )
+            if (response.status === 200){
+                props.setConfirmedRidePopUpPanel(false)
+                props.setRidePopUpPanel(false)
+                navigator('/captain-riding', { state: { ride: response.data } })
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Unable to start the ride.');
+        }
     }
 
     const handleKeyClick = (val) => {
@@ -88,9 +114,7 @@ const ConfirmedRIdePopUp = (props) => {
                 </div>
 
                 <div className='mt-4'>
-                    <form onSubmit={(e) => {
-                        submitOpt(e)
-                    }}>
+                    <form onSubmit={submitOpt}>
                         <input
                             type="text"
                             value={otp}
@@ -118,7 +142,7 @@ const ConfirmedRIdePopUp = (props) => {
                         </div>
 
                         <div className='flex flex-col gap-3'>
-                            <Link to='/captain-riding' className='w-full bg-green-600 text-white font-semibold p-2 rounded-lg text-center'>Confirm</Link>
+                            <button to='/captain-riding' className='w-full bg-green-600 text-white font-semibold p-2 rounded-lg text-center'>Confirm</button>
                             <button type='button' onClick={() => {
                                 props.setRidePopUpPanel(false)
                                 props.setConfirmedRidePopUpPanel(false)

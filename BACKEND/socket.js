@@ -51,6 +51,12 @@ function initializeSocket(server) {
             io.to(`user_${userId}`).emit('ride-rejected', { rideId });
         });
 
+        socket.on('ride-paid', ({ captainId, rideId }) => {
+            if (!captainId || !rideId) return;
+
+            io.to(`captain_${captainId}`).emit('ride-paid', { rideId });
+        });
+
         socket.on('disconnect', () => {
             console.log(`Client disconnected: ${socket.id}`);
         });

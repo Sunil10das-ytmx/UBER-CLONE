@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import UberPassenger from '../assets/UberPassenger.png';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { formatAddress } from '../utils/formatAddress';
+import { toast } from 'react-toastify';
 
 const FinishRide = (props) => {
     const [fare, setFare] = useState(null);
+    const [finishing, setFinishing] = useState(false);
+    const navigate = useNavigate();
     const pickupAddr = formatAddress(props.ride?.pickup || 'Howrah Railway Station', 'Howrah Railway Station');
     const destAddr = formatAddress(props.ride?.destination || 'Dakshineswar Kali Temple', 'Dakshineswar Kali Temple');
 
@@ -13,7 +16,7 @@ const FinishRide = (props) => {
         const pickup = props.ride?.pickup ;
         const destination = props.ride?.destination ;
 
-        if (pickup && destination && !props.ride?.fare) {
+        if (pickup && destination && props.ride?.fare == null) {
             axios
                 .get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
                     params: { pickup, destination },
@@ -30,7 +33,34 @@ const FinishRide = (props) => {
         }
     }, [props.ride]);
 
-    const displayFare = props.ride?.fare ? `₹${props.ride.fare}` : fare ? fare : '';
+    const displayFare = props.ride?.fare != null
+        ? `₹${props.ride.fare}`
+        : fare != null
+            ? `₹${fare}`
+            : '₹0';
+
+    const completeRide = async () => {
+        if (!props.paymentReceived || !props.ride?._id || finishing) return;
+
+        setFinishing(true);
+        try {
+            await axios.post(
+                `${import.meta.env.VITE_BASE_URL}/rides/end-ride`,
+                { rideId: props.ride._id },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                }
+            );
+            toast.success('Ride completed successfully.');
+            navigate('/captain-home');
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Unable to complete the ride.');
+        } finally {
+            setFinishing(false);
+        }
+    };
 
     return (
         <div className='h-full flex flex-col justify-between select-none'>
@@ -102,15 +132,19 @@ const FinishRide = (props) => {
 
             {/* Complete Action & Note */}
             <div className='mt-6 px-2 flex flex-col gap-3 mb-4'>
-                <Link 
-                    to='/captain-home' 
-                    className='w-full bg-green-600 text-white font-semibold p-3 rounded-lg text-center text-lg block hover:bg-green-700 transition-colors'
+                <button
+                    type='button'
+                    onClick={completeRide}
+                    disabled={!props.paymentReceived || finishing}
+                    className='w-full bg-green-600 text-white font-semibold p-3 rounded-lg text-center text-lg block hover:bg-green-700 transition-colors disabled:cursor-not-allowed disabled:bg-gray-400'
                 >
-                    Finish Ride
-                </Link>
+                    {finishing ? 'Completing Ride...' : props.paymentReceived ? 'Finish Ride' : 'Waiting for Payment'}
+                </button>
                 
                 <p className='text-red-500 text-xs text-center font-medium'>
-                    Click on "Finish Ride" button if you have collected the cash payment.
+                    {props.paymentReceived
+                        ? 'Payment received. You can now complete the ride.'
+                        : 'The passenger must pay before you can complete the ride.'}
                 </p>
             </div>
         </div>
