@@ -45,7 +45,6 @@ module.exports.createRide = async (req, res) => {
         if (Array.isArray(captainsInRadius)) {
             captainsInRadius.forEach(captain => {
                 if (captain.socketId) {
-                    console.log(`Sending new-ride event to captain ${captain._id} (socketId: ${captain.socketId})`);
                     sendMessageToSocketId(captain.socketId, {
                         event: 'new-ride',
                         data: rideWithUser || ride

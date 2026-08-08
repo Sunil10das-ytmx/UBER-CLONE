@@ -13,12 +13,8 @@ function initializeSocket(server) {
     });
 
     io.on('connection', (socket) => {
-        console.log(`Client connected: ${socket.id}`);
-
         socket.on('join', async (data) => {
             const { userId, userType } = data;
-
-            console.log(`user ${userId} joined as ${userType}`)
 
             if (userType === 'user') {
                 socket.join(`user_${userId}`);
@@ -57,18 +53,13 @@ function initializeSocket(server) {
             io.to(`captain_${captainId}`).emit('ride-paid', { rideId });
         });
 
-        socket.on('disconnect', () => {
-            console.log(`Client disconnected: ${socket.id}`);
-        });
+        socket.on('disconnect', () => {});
     });
 }
 
 const sendMessageToSocketId = (socketId, messageObject) => {
-    console.log(`Sending message to socket ${socketId}:`, messageObject);
     if (io) {
         io.to(socketId).emit(messageObject.event, messageObject.data);
-    } else {
-        console.log('Socket.io not initialized.');
     }
 };
 

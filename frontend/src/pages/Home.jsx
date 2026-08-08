@@ -7,8 +7,6 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import "remixicon/fonts/remixicon.css";
 import { motion } from 'framer-motion'
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import LocationSearchPanel from "../Component/LocationSearchPanel";
 import VehiclePanel from "../Component/VehiclePanel";
 import ConfirmedRide from "../Component/ConfirmedRide";
@@ -16,13 +14,14 @@ import LookingforDriver from "../Component/LookingforDriver";
 import UberCar from "../assets/UberCar.png";
 import UberBike from "../assets/UberBike.webp";
 import UberAuto from "../assets/UberAuto.png";
-import {SocketContext} from '../context/SocketContext'
-import {UserDataContext} from '../context/UserContext'
+import { SocketContext } from '../context/SocketContext'
+import { UserDataContext } from '../context/UserContext'
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import WaitingforDriver from "../Component/WaitingforDriver";
 import Riding from "./Riding";
+import LiveTracking from "../Component/LiveTracking";
 import { toast } from "react-toastify";
 
 const Home = (props) => {
@@ -41,9 +40,9 @@ const Home = (props) => {
     },
   ];
 
-  const {socket} = useContext(SocketContext)
-  const {user} = useContext(UserDataContext)
-  
+  const { socket } = useContext(SocketContext)
+  const { user } = useContext(UserDataContext)
+
   const panelRef = useRef(null);
   const panelCloeRef = useRef(null);
   const vehiclePanelRef = useRef(null);
@@ -101,10 +100,18 @@ const Home = (props) => {
     }
   };
 
-  useEffect(()=>{
-    
-    socket.emit("join",{userType:"user", userId:user?._id})
-  },[user])
+  const isPickupManuallyEditedRef = useRef(false);
+
+  const handleLiveLocationUpdate = (loc) => {
+    if (loc?.address && (!pickup || !isPickupManuallyEditedRef.current)) {
+      setPickup(loc.address);
+    }
+  };
+
+  useEffect(() => {
+
+    socket.emit("join", { userType: "user", userId: user?._id })
+  }, [user])
 
 
   useEffect(() => {
@@ -115,6 +122,11 @@ const Home = (props) => {
 
   const handlePickupChange = async (e) => {
     const value = e.target.value;
+    if (value === "") {
+      isPickupManuallyEditedRef.current = false;
+    } else {
+      isPickupManuallyEditedRef.current = true;
+    }
     setPickup(value);
     setActiveField("pickup");
     setpanelOpen(true);
@@ -267,11 +279,11 @@ const Home = (props) => {
     function () {
       if (waitingForDriver) {
         gsap.to(waitingForDriverRef.current, {
-          transform: "translateY(0)",
+          transform: "translateX(0)",
         });
       } else {
         gsap.to(waitingForDriverRef.current, {
-          transform: "translateY(100%)",
+          transform: "translateX(100%)",
         });
       }
     },
@@ -280,7 +292,6 @@ const Home = (props) => {
 
   useEffect(() => {
     const handleRideConfirmed = (confirmedRide) => {
-      console.log("Ride confirmed by captain:", confirmedRide);
       setvehicleFound(false);
       setvehiclePanelOpen(false);
       setWaitingForDriver(true);
@@ -328,8 +339,6 @@ const Home = (props) => {
       const dStr = destination && destination.trim().length >= 3 ? destination.trim() : "Dakshineswar Kali Temple";
       const vType = vehicleType || selectedVehicle?.valueKey || "car";
 
-      console.log("Creating ride payload:", { pickup: pStr, drop: dStr, vehicleType: vType });
-
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/rides/create`,
         {
@@ -343,7 +352,6 @@ const Home = (props) => {
           },
         }
       );
-      console.log("Created ride successfully:", response.data);
       setRide(response.data);
     } catch (error) {
       console.error("Error creating ride:", error?.response?.data || error.message);
@@ -354,13 +362,18 @@ const Home = (props) => {
   return (
     <>
       <div className="h-screen relative overflow-hidden">
+        {/* LocationIQ Live Tracking Map Background */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <LiveTracking height="100%" showInfoCard={false} onLocationUpdate={handleLiveLocationUpdate} />
+        </div>
+
         <img
-          className="w-35 absolute left-30 top-5 "
+          className="w-35 absolute left-30 top-5 z-[10]"
           src={UberLogo}
           alt="uber logo"
         />
 
-        <div className="absolute top-28 left-1/2 -translate-x-1/2 text-center">
+        <div className="absolute top-28 left-1/2 -translate-x-1/2 text-center z-[10]">
           <h4 className="text-sm font-semibold uppercase tracking-[0.55em] text-zinc-700">
             FOR YOU
           </h4>
@@ -370,17 +383,17 @@ const Home = (props) => {
           </h1>
         </div>
 
-        <div className=" flex flex-col justify-end absolute h-screen  top-0  w-full">
+        <div className="flex flex-col justify-end absolute h-screen top-0 w-full z-[10] pointer-events-none">
           <div
             ref={inputRef}
-            className="h-[33%] p-6 bg-white relative rounded-tr-3xl rounded-tl-3xl border-2 border-black "
+            className="h-[33%] p-6 bg-white relative rounded-tr-3xl rounded-tl-3xl border-2 border-black pointer-events-auto"
           >
             <h5
               ref={panelCloeRef}
               onClick={() => {
                 setpanelOpen(false);
               }}
-              className="absolute top-6 opacity-0 right-6 text-2xl"
+              className="absolute top-6 opacity-0 right-6 text-2xl cursor-pointer"
             >
               <i className="ri-arrow-down-wide-line"></i>
             </h5>
@@ -421,7 +434,7 @@ const Home = (props) => {
             </form>
             <button
               onClick={() => {
-                  findTrip()
+                findTrip()
               }}
               className="bg-black text-white px-12 py-2 text-base rounded-lg w-full mt-4 mb-4"
             >
@@ -429,7 +442,7 @@ const Home = (props) => {
             </button>
           </div>
 
-          <div ref={panelRef} className=" bg-gray-200  h-0">
+          <div ref={panelRef} className=" bg-gray-200 h-0 pointer-events-auto">
             <LocationSearchPanel
               suggestions={suggestions}
               setpanelOpen={setpanelOpen}
@@ -475,7 +488,7 @@ const Home = (props) => {
           />
         </div>
 
-        <div ref={waitingForDriverRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-y-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
+        <div ref={waitingForDriverRef} className="fixed bottom-0 left-0 right-0 z-10 flex flex-col translate-x-full gap-3 bg-white border-2 border-black rounded-tr-3xl rounded-tl-3xl p-3">
           <WaitingforDriver
             ride={ride}
             fare={fare}

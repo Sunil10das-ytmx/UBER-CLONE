@@ -8,13 +8,8 @@ const socket = io(`${import.meta.env.VITE_BASE_URL || 'http://localhost:4000'}`)
 const SocketProvider = ({ children }) => {
     useEffect(() => {
         // Basic connection topic with server
-        socket.on('connect', () => {
-            console.log('Connected to server');
-        });
-
-        socket.on('disconnect', () => {
-            console.log('Disconnected from server');
-        });
+        socket.on('connect', () => {});
+        socket.on('disconnect', () => {});
     }, []);
 
     // const sendMessage = (eventName, message) => {

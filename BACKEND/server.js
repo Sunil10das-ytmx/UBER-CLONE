@@ -14,8 +14,6 @@ function startServer(currentPort, attemptsLeft) {
             console.error(`Port ${currentPort} is in use.`);
             if (attemptsLeft > 0) {
                 const nextPort = currentPort + 1;
-                console.log(`Trying port ${nextPort}... (${attemptsLeft - 1} attempts left)`);
-                // small delay before retrying
                 setTimeout(() => startServer(nextPort, attemptsLeft - 1), 200);
                 return;
             }

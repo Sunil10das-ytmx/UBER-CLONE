@@ -1,6 +1,7 @@
 import React,{useState,useRef,useEffect,useContext} from 'react'
 import UberLogo from '../assets/Uber-logo.png'
 import UberMap from "../assets/Uber-map.gif";
+import LiveTracking from "../Component/LiveTracking";
 import { Link } from "react-router-dom"; 
 import { useLocation } from "react-router-dom";
 import { useGSAP } from "@gsap/react";
@@ -72,8 +73,8 @@ useEffect(() => {
         </Link>
         </div>
 
-        <div className="h-[80%]">
-            <img className="h-full w-full object-cover" src={UberMap} />
+        <div className="h-[80%] relative overflow-hidden">
+            <LiveTracking height="100%" showInfoCard={false} />
         </div>
 
         <div className='flex bg-yellow-500 h-1/5 p-6 items-center justify-between relative'

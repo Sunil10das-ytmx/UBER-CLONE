@@ -35,12 +35,9 @@ const CaptainLogin = () => {
     }catch(err){
       console.error('login error', err?.response || err);
     }
-    console.log(CaptainData);
-
 
     setEmail("");
     setPassword("");
-
   };
 
   return (

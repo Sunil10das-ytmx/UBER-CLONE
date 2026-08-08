@@ -39,8 +39,6 @@ const Userlogin = () => {
     }
     setEmail("");
     setPassword("");
-
-    console.log(userData);
   };
 
   return (

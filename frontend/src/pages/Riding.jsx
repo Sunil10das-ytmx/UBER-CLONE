@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'  // TEMPORARY:
 import { formatAddress } from "../utils/formatAddress";
 import { SocketContext } from '../context/SocketContext';
 import UberMap from "../assets/Uber-map.gif";
+import LiveTracking from "../Component/LiveTracking";
 import uberDriver from "../assets/UberDriver.png";
 import UberCar from "../assets/UberCar.png";
 import UberBike from "../assets/UberBike.webp";
@@ -225,11 +226,11 @@ const Riding = (props) => {
   return (
     <>
       <div className="h-screen">
-        <Link to='/home' className='fixed right-2 top-2 h-10 w-10 bg-white flex items-center justify-center rounded-full'>
+        <Link to='/home' className='fixed right-2 top-2 h-10 w-10 bg-white flex items-center justify-center rounded-full z-[1001] shadow-md'>
                 <i className="text-lg font-medium ri-home-5-line"></i>
             </Link>
-        <div className="h-1/2">
-          <img className="h-full w-full object-cover" src={UberMap} />
+        <div className="h-1/2 relative overflow-hidden">
+          <LiveTracking height="100%" showInfoCard={false} />
         </div>
         <div className=" flex flex-col justify-center item-enter mt-3">
           <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">

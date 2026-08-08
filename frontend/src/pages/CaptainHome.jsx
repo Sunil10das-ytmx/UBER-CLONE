@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect,useContext } from "react";
 import { Link } from "react-router-dom"; // TEMPORARY: Using location state for navigate routing
 import UberMap from "../assets/Uber-map.gif";
+import LiveTracking from "../Component/LiveTracking";
 import UberLogo from '../assets/Uber-logo.png'
 import CaptainDetails from "../Component/CaptainDetails";
 import RidePopUp from "../Component/RidePopUp";
@@ -50,7 +51,6 @@ const CaptainHome = (props) => {
 
   useEffect(() => {
     const handleNewRide = (data) => {
-      console.log('Received new-ride event:', data);
       setRide(data);
       setRidePopUpPanel(true);
     };
@@ -80,8 +80,8 @@ const CaptainHome = (props) => {
           </Link>
         </div>
 
-        <div className="h-[68%]">
-          <img className="h-full w-full object-cover" src={UberMap} />
+        <div className="h-[68%] relative overflow-hidden">
+          <LiveTracking height="100%" showInfoCard={false} />
         </div>
 
         <div className="h-2/5 p-6 bg-white rounded-t-3xl relative -mt-6 z-10">
