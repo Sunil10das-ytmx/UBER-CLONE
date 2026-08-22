@@ -53,6 +53,7 @@ const Home = (props) => {
   const waitingForDriverRef = useRef(null);
 
   const [pickup, setPickup] = useState("");
+  const [InputRef, setInputRef] = useState(true);
   const [destination, setDestination] = useState("");
   const [panelOpen, setpanelOpen] = useState(false);
   const [vehiclePanelOpen, setvehiclePanelOpen] = useState(false);
@@ -72,6 +73,7 @@ const Home = (props) => {
   const findTrip = async (pickupVal, destVal) => {
     setvehiclePanelOpen(true);
     setpanelOpen(false);
+    setInputRef(false)
 
     const getStr = (val) => {
       if (!val) return "";
@@ -203,6 +205,9 @@ const Home = (props) => {
           opacity: "1",
         });
         gsap.to(inputRef.current, {
+          height: InputRef ? "33%" : "0%",
+          padding: InputRef ? "1.5rem" : "0rem",
+          borderWidth: InputRef ? "2px" : "0px",
           borderTopLeftRadius: "0rem",
           borderTopRightRadius: "0",
           borderColor: "transparent",
@@ -215,13 +220,16 @@ const Home = (props) => {
           opacity: "0",
         });
         gsap.to(inputRef.current, {
+          height: InputRef ? "33%" : "0%",
+          padding: InputRef ? "1.5rem" : "0rem",
+          borderWidth: InputRef ? "2px" : "0px",
           borderTopLeftRadius: "1.5rem",
           borderTopRightRadius: "1.5rem",
           borderColor: "#000000",
         });
       }
     },
-    [panelOpen],
+    [InputRef, panelOpen],
   );
 
   useGSAP(
@@ -386,7 +394,7 @@ const Home = (props) => {
         <div className="flex flex-col justify-end absolute h-screen top-0 w-full z-1000 pointer-events-none">
           <div
             ref={inputRef}
-            className="h-[33%] p-6 bg-white relative rounded-tr-3xl rounded-tl-3xl border-2 border-black pointer-events-auto"
+            className="h-[33%] p-6 bg-white relative overflow-hidden rounded-tr-3xl rounded-tl-3xl border-2 border-black pointer-events-auto"
           >
             <h5
               ref={panelCloeRef}
@@ -410,6 +418,7 @@ const Home = (props) => {
               <div className="line mt-3 absolute h-16 w-1 bottom-[25%] -translate-y-1/2 left-9 bg-gray-700 rounded-full"></div>
               <input
                 onClick={() => {
+                  setInputRef(true);
                   setpanelOpen(true);
                   setActiveField("pickup");
                 }}
@@ -422,6 +431,7 @@ const Home = (props) => {
 
               <input
                 onClick={() => {
+                  setInputRef(true);
                   setpanelOpen(true);
                   setActiveField("destination");
                 }}
@@ -434,6 +444,7 @@ const Home = (props) => {
             </form>
             <button
               onClick={() => {
+                
                 findTrip()
               }}
               className="bg-black text-white px-12 py-2 text-base rounded-lg w-full mt-4 mb-4"
