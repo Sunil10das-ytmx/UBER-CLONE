@@ -64,6 +64,7 @@ const Home = (props) => {
   const [waitingForDriver, setWaitingForDriver] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [activeField, setActiveField] = useState(null);
+  
   const [fare, setFare] = useState({});
   const [vehicleType, setvehicleType] = useState(null);
   const [ride, setRide] = useState(null);
