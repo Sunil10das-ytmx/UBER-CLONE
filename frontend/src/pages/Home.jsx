@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import UberLogo from "../assets/Uber-logo.png";
-import ubermap from "../assets/uber-map.gif";
+import ubermap from "../assets/Uber-map.gif";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import "remixicon/fonts/remixicon.css";
