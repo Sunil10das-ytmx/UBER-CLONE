@@ -11,15 +11,15 @@ const UserSignUp = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  // const [userData, setUserData] = useState({});
+  const [error, setError] = useState("");
 
   const navigate = useNavigate()
 
-  const {user,setUser} = React.useContext(UserDataContext)
-  useContext
+  const {user, setUser} = React.useContext(UserDataContext)
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    setError("");
     const newUser = {
       fullname: {
         firstname: firstName,
@@ -30,22 +30,26 @@ const UserSignUp = () => {
     };
 
     try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
-    if (response.status === 200 || response.status === 201) {
-      const data = response.data;
-      setUser(data.user);
-      localStorage.setItem('token',data.token)
-      navigate('/login');
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
+      if (response.status === 200 || response.status === 201) {
+        const data = response.data;
+        setUser(data.user);
+        localStorage.setItem('token', data.token);
+        // ✅ Reset fields only on success
+        setEmail("");
+        setFirstName("");
+        setLastName("");
+        setPassword("");
+        navigate('/home');
+      }
+    } catch (err) {
+      console.error('Signup error', err?.response || err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.errors?.[0]?.msg ||
+        'Registration failed. Please try again.';
+      setError(msg);
     }
-  } catch (err) {
-    console.error('Signup error', err?.response || err);
-  
-  }
-
-    setEmail("");
-    setFirstName("");
-    setLastName("");
-    setPassword("");
   };
   return (
     <>
@@ -119,6 +123,12 @@ const UserSignUp = () => {
                 type="password"
                 placeholder="password"
               />
+
+              {error && (
+                <p className="text-red-500 text-sm mb-3 text-center font-medium">
+                  {error}
+                </p>
+              )}
 
               <button className="bg-black text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg">
                 Create account

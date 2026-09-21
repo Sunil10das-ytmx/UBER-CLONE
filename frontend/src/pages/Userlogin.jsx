@@ -12,7 +12,7 @@ import axios from 'axios'
 const Userlogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const [userData, setUserdata] = useState({});
+  const [error, setError] = useState("");
 
     const navigate = useNavigate()
 
@@ -20,25 +20,31 @@ const Userlogin = () => {
 
   const Submitfrom = async (e) => {
     e.preventDefault();
+    setError("");
 
-    const userData={
+    const userData = {
       email: email,
       password: password,
     }
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`,userData)
-      if(response.status === 200){
-        const data=response.data
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData)
+      if (response.status === 200) {
+        const data = response.data
         setUser(data.user)
-        localStorage.setItem('token',data.token)
+        localStorage.setItem('token', data.token)
+        setEmail("");
+        setPassword("");
         navigate('/home')
       }
     } catch (err) {
       console.error('login error', err?.response || err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.errors?.[0]?.msg ||
+        'Invalid email or password. Please try again.';
+      setError(msg);
     }
-    setEmail("");
-    setPassword("");
   };
 
   return (
@@ -98,6 +104,11 @@ const Userlogin = () => {
             </div>
 
             <div className="pt-2">
+              {error && (
+                <p className="text-red-500 text-sm mb-2 text-center font-medium">
+                  {error}
+                </p>
+              )}
               <button
                 type="submit"
                 className="w-full bg-black text-white px-4 py-2 rounded-md font-semibold hover:opacity-90"
