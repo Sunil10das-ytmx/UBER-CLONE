@@ -3,11 +3,12 @@ import { io } from 'socket.io-client';
 
 export const SocketContext = createContext();
 
-// Force WebSocket-only transport.
-// This prevents Render from routing the HTTP polling handshake to a different
-// server instance than the one that holds the persistent WebSocket connection.
+// Allow BOTH transports:
+//   - 'websocket'  → fast, preferred on WiFi/stable connections
+//   - 'polling'    → fallback for mobile carriers (Jio/Airtel/Vi) that block
+//                    raw WebSocket upgrades on their proxy infrastructure
 const socket = io(`${import.meta.env.VITE_BASE_URL || 'http://localhost:4000'}`, {
-    transports: ['websocket'],   // skip long-polling entirely
+    transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
@@ -38,7 +39,20 @@ const SocketProvider = ({ children }) => {
             console.error('[Socket] connection error:', err.message);
         });
 
+        // ── Keepalive ──────────────────────────────────────────────────────────
+        // Mobile browsers (Chrome/Safari on Android/iOS) freeze JavaScript when
+        // the screen dims or the user briefly switches apps. This kills the
+        // socket connection. We send a lightweight ping every 20 s so the
+        // browser keeps the connection alive as long as the tab is open.
+        const keepAlive = setInterval(() => {
+            if (socket.connected) {
+                socket.emit('ping'); // server ignores unknown events — this is safe
+            }
+        }, 20000);
+        // ──────────────────────────────────────────────────────────────────────
+
         return () => {
+            clearInterval(keepAlive);
             socket.off('connect');
             socket.off('disconnect');
             socket.off('connect_error');
