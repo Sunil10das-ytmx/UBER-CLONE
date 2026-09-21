@@ -13,17 +13,20 @@ const mapRoutes = require('./ROUTES/maps.route.js')
 const rideRoutes = require('./ROUTES/ride.route.js');
 connectDatabase();
 
+// Strip trailing slashes so "https://example.com/" and "https://example.com" both match
 const allowedOrigins = [
     process.env.FRONTEND_ORIGINS,
     'http://localhost:5173',
     'http://localhost:3000',
-].filter(Boolean);
+].filter(Boolean).map(o => o.replace(/\/$/, ''));
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests with no origin (e.g., mobile apps, curl, Postman)
+        // Allow requests with no origin (e.g., Postman, curl, mobile apps)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
+        // Normalise incoming origin too (browsers never send trailing slash, but just in case)
+        const normalisedOrigin = origin.replace(/\/$/, '');
+        if (allowedOrigins.includes(normalisedOrigin)) return callback(null, true);
         callback(new Error(`CORS: origin ${origin} not allowed`));
     },
     credentials: true,
