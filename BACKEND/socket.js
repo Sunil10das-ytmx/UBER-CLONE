@@ -8,13 +8,11 @@ let io;
 function initializeSocket(server) {
     io = socketIo(server, {
         cors: {
-            origin: '*',
+            origin: true,
+            credentials: true,
             methods: ['GET', 'POST']
         },
-        // Allow BOTH transports — mobile carrier proxies in India often block
-        // raw WebSocket upgrades, so polling fallback is essential for phones.
         transports: ['websocket', 'polling'],
-        // Detect dead mobile connections faster (phone screen-off kills sockets)
         pingTimeout: 25000,
         pingInterval: 10000,
     });

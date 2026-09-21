@@ -110,13 +110,47 @@ module.exports.getAutoSuggestions = async (input) => {
     }
 };
 
-module.exports.getcaptainsInRadius = async (ltd, lng, radius) => {
-    const captains = await captainModel.find({
-        location: {
-            $geoWithin: {
-                $centerSphere: [[lng, ltd], radius / 6371]
-            }
-        }
-    });
-    return captains;
+function getHaversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
 }
+
+module.exports.getcaptainsInRadius = async (ltd, lng, radius = 50) => {
+    try {
+        const captains = await captainModel.find({
+            location: {
+                $geoWithin: {
+                    $centerSphere: [[lng, ltd], radius / 6371]
+                }
+            }
+        });
+        if (captains && captains.length > 0) return captains;
+    } catch (err) {
+        console.warn("[MapsService] $geoWithin query fallback to JS calculation:", err.message);
+    }
+
+    try {
+        const allCaptains = await captainModel.find({
+            'location.ltd': { $exists: true, $ne: null },
+            'location.lng': { $exists: true, $ne: null }
+        });
+
+        const captainsInRadius = allCaptains.filter(c => {
+            if (!c.location || c.location.ltd == null || c.location.lng == null) return false;
+            const dist = getHaversineDistance(ltd, lng, c.location.ltd, c.location.lng);
+            return dist <= radius;
+        });
+
+        return captainsInRadius;
+    } catch (err) {
+        console.error("[MapsService] Error in captain radius fallback:", err.message);
+        return [];
+    }
+};

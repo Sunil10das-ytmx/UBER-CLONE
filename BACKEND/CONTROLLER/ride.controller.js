@@ -22,36 +22,58 @@ module.exports.createRide = async (req, res) => {
         });
 
         res.status(201).json(ride);
-        
-        const pickupCoordinate = await mapService.getAddressCoordinate(pickup);
 
-        let captainsInRadius = await mapService.getcaptainsInRadius(pickupCoordinate.ltd, pickupCoordinate.lng, 2);
+        // Safe async broadcast (won't crash HTTP response or swallow errors)
+        (async () => {
+            try {
+                let pickupCoordinate = { ltd: 22.5726, lng: 88.3639 };
+                try {
+                    pickupCoordinate = await mapService.getAddressCoordinate(pickup);
+                } catch (e) {
+                    console.warn('[CreateRide] geocoding fallback used:', e.message);
+                }
 
-        // Fallback for testing: if no captain is within 2km, notify any connected captain with a socketId
-        if (!captainsInRadius || captainsInRadius.length === 0) {
-            captainsInRadius = await captainModel.find({ socketId: { $exists: true, $ne: null } });
-        }
+                let captainsInRadius = [];
+                try {
+                    captainsInRadius = await mapService.getcaptainsInRadius(pickupCoordinate.ltd, pickupCoordinate.lng, 50);
+                } catch (e) {
+                    console.warn('[CreateRide] getcaptainsInRadius warning:', e.message);
+                }
 
-        ride.otp = "";
+                if (!captainsInRadius || captainsInRadius.length === 0) {
+                    captainsInRadius = await captainModel.find({ socketId: { $exists: true, $ne: null } });
+                }
 
-        const rideWithUser = await rideModel.findOne({ _id: ride._id }).populate('user').select('+otp');
+                ride.otp = "";
+                const rideWithUser = await rideModel.findOne({ _id: ride._id }).populate('user').select('+otp');
+                const ridePayload = rideWithUser || ride;
 
-        // Broadcast to 'captains' room so all active captains receive the pop-up
-        sendMessageToSocketId('captains', {
-            event: 'new-ride',
-            data: rideWithUser || ride
-        });
+                // 1. Broadcast to 'captains' room
+                sendMessageToSocketId('captains', {
+                    event: 'new-ride',
+                    data: ridePayload
+                });
 
-        if (Array.isArray(captainsInRadius)) {
-            captainsInRadius.forEach(captain => {
-                if (captain.socketId) {
-                    sendMessageToSocketId(captain.socketId, {
-                        event: 'new-ride',
-                        data: rideWithUser || ride
+                // 2. Broadcast to captain personal room and socketId
+                if (Array.isArray(captainsInRadius)) {
+                    captainsInRadius.forEach(captain => {
+                        sendMessageToSocketId(`captain_${captain._id}`, {
+                            event: 'new-ride',
+                            data: ridePayload
+                        });
+                        if (captain.socketId) {
+                            sendMessageToSocketId(captain.socketId, {
+                                event: 'new-ride',
+                                data: ridePayload
+                            });
+                        }
                     });
                 }
-            });
-        }
+                console.log(`[CreateRide] Broadcasted new-ride ${ride._id} to captains`);
+            } catch (broadcastErr) {
+                console.error('[CreateRide] Error in socket broadcast:', broadcastErr);
+            }
+        })();
 
     } catch (err) {
         console.error("Error creating ride:", err);
