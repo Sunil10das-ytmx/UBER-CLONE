@@ -112,8 +112,11 @@ const Home = (props) => {
   };
 
   useEffect(() => {
-
-    socket.emit("join", { userType: "user", userId: user?._id })
+    if (!user?._id) return;
+    // Persist identity so socket auto-rejoins on mobile reconnect
+    localStorage.setItem('userId', user._id);
+    localStorage.setItem('userType', 'user');
+    socket.emit("join", { userType: "user", userId: user._id });
   }, [user])
 
 

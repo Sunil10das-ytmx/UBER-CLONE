@@ -27,6 +27,9 @@ const CaptainHome = (props) => {
   useEffect(() => {
     if (!captain?._id) return;
 
+    // Persist identity so socket auto-rejoins on mobile reconnect
+    localStorage.setItem('userId', captain._id);
+    localStorage.setItem('userType', 'captain');
     socket.emit("join", { userType: "captain", userId: captain._id });
 
     const updateLocation = () => {

@@ -9,7 +9,12 @@ function initializeSocket(server) {
         cors: {
             origin: '*',
             methods: ['GET', 'POST']
-        }
+        },
+        // Detect dead mobile connections quickly so the captain's socketId
+        // in MongoDB doesn't stay stale after the phone goes to background
+        pingTimeout: 20000,
+        pingInterval: 10000,
+        transports: ['websocket', 'polling'],  // websocket preferred, polling as fallback
     });
 
     io.on('connection', (socket) => {
